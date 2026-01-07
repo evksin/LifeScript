@@ -14,6 +14,8 @@ async function getNotes() {
   }
 }
 
+type Note = Awaited<ReturnType<typeof getNotes>>[0];
+
 export default async function Home() {
   const notes = await getNotes();
 
@@ -41,7 +43,7 @@ export default async function Home() {
           </p>
         ) : (
           <ul style={{ listStyle: "none" }}>
-            {notes.map((note) => (
+            {notes.map((note: Note) => (
               <li
                 key={note.id}
                 style={{
