@@ -14,6 +14,19 @@ async function getNotes() {
   }
 }
 
+function getDatabaseInfo() {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return "DATABASE_URL не настроен";
+  
+  // Показываем только хост и базу данных (без пароля)
+  try {
+    const url = new URL(dbUrl);
+    return `${url.hostname}${url.pathname}`;
+  } catch {
+    return "Не удалось распарсить DATABASE_URL";
+  }
+}
+
 type Note = Awaited<ReturnType<typeof getNotes>>[0];
 
 export default async function Home() {
@@ -84,8 +97,13 @@ export default async function Home() {
           fontSize: "0.875rem",
         }}
       >
-        <strong>Статус:</strong> Подключение к базе данных работает! Найдено
-        заметок: {notes.length}
+        <div style={{ marginBottom: "0.5rem" }}>
+          <strong>Статус:</strong> Подключение к базе данных работает! Найдено
+          заметок: {notes.length}
+        </div>
+        <div style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "#666" }}>
+          <strong>База данных:</strong> {getDatabaseInfo()}
+        </div>
       </div>
     </main>
   );
