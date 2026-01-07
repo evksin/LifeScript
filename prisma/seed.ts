@@ -5,6 +5,11 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Начинаем seeding...')
 
+  // Удаляем все существующие заметки
+  const deleted = await prisma.note.deleteMany({})
+  console.log(`Удалено заметок: ${deleted.count}`)
+
+  // Создаём 3 новые заметки
   const note1 = await prisma.note.create({
     data: {
       title: 'Первая заметка',
