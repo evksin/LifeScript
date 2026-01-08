@@ -11,10 +11,6 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   useEffect(() => {
-    console.log("LoginForm status:", status, "session:", session);
-  }, [status, session]);
-
-  useEffect(() => {
     if (status === "authenticated" && session) {
       router.push(callbackUrl);
     }
