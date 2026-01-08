@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next dev",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 prisma generate && cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
@@ -12,7 +12,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:test": "tsx prisma/test-data.ts",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "cross-env NODE_OPTIONS=--max-old-space-size=4096 prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -26,6 +26,7 @@
     "@types/node": "^20.14.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "cross-env": "^10.1.0",
     "prisma": "^5.19.1",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
