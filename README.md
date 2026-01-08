@@ -25,6 +25,26 @@ npm install
 
 ```env
 DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+AUTH_SECRET="your-auth-secret"
+```
+
+**Получение Google OAuth credentials:**
+1. Перейдите в [Google Cloud Console](https://console.cloud.google.com)
+2. Создайте новый проект или выберите существующий
+3. Включите Google+ API
+4. Перейдите в "Credentials" → "Create Credentials" → "OAuth client ID"
+5. Выберите "Web application"
+6. Добавьте Authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (для разработки)
+   - `https://your-domain.vercel.app/api/auth/callback/google` (для production)
+7. Скопируйте Client ID и Client Secret
+
+**Генерация AUTH_SECRET:**
+```powershell
+# Используйте OpenSSL или любой генератор случайных строк
+openssl rand -base64 32
 ```
 
 ### 3. Настройка Prisma и миграция
