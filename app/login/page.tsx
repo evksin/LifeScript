@@ -16,8 +16,13 @@ function LoginForm() {
     }
   }, [status, session, callbackUrl, router]);
 
-  const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl });
+  const handleGoogleSignIn = async () => {
+    try {
+      await signIn("google", { callbackUrl });
+    } catch (error) {
+      console.error("Ошибка при входе:", error);
+      alert("Ошибка при входе. Проверьте консоль браузера.");
+    }
   };
 
   if (status === "loading") {

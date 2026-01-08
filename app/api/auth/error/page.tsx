@@ -15,7 +15,9 @@ function ErrorContent() {
     Default: "Произошла ошибка при входе.",
   };
 
-  const errorMessage = error ? errorMessages[error] || errorMessages.Default : errorMessages.Default;
+  const errorMessage = error
+    ? errorMessages[error] || errorMessages.Default
+    : errorMessages.Default;
 
   return (
     <main
@@ -97,4 +99,3 @@ export default function AuthErrorPage() {
     </Suspense>
   );
 }
-
