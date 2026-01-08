@@ -21,7 +21,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: "/login",
-    error: "/api/auth/error",
   },
   secret: process.env.AUTH_SECRET,
   trustHost: true,
