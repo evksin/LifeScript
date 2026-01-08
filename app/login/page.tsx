@@ -11,6 +11,10 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   useEffect(() => {
+    console.log("LoginForm status:", status, "session:", session);
+  }, [status, session]);
+
+  useEffect(() => {
     if (status === "authenticated" && session) {
       router.push(callbackUrl);
     }
@@ -35,7 +39,12 @@ function LoginForm() {
           minHeight: "100vh",
         }}
       >
-        <p>Загрузка...</p>
+        <div style={{ textAlign: "center" }}>
+          <p>Загрузка...</p>
+          <p style={{ fontSize: "0.875rem", color: "#666", marginTop: "1rem" }}>
+            Проверка сессии...
+          </p>
+        </div>
       </main>
     );
   }
