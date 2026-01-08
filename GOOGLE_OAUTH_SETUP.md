@@ -3,10 +3,12 @@
 ## Способ 1: Через Google Cloud Console (любой регион)
 
 1. **Откройте Google Cloud Console:**
+
    - Перейдите на https://console.cloud.google.com
    - Или используйте прямой URL: https://console.cloud.google.com/apis/credentials
 
 2. **Создайте проект (если еще нет):**
+
    - Нажмите на выпадающий список проектов вверху страницы
    - Нажмите "New Project"
    - Введите название проекта (например, "LifeScript")
@@ -14,11 +16,13 @@
    - Нажмите "Create"
 
 3. **Включите Google+ API:**
+
    - В меню слева выберите "APIs & Services" → "Library"
    - Найдите "Google+ API" или "Google Identity"
    - Нажмите "Enable"
 
 4. **Создайте OAuth 2.0 Client ID:**
+
    - Перейдите в "APIs & Services" → "Credentials"
    - Нажмите "+ CREATE CREDENTIALS" → "OAuth client ID"
    - Если появится экран настройки OAuth consent screen:
@@ -55,6 +59,7 @@
 ## Способ 3: Использование существующего проекта
 
 Если у вас уже есть проект в Google Cloud:
+
 1. Откройте https://console.cloud.google.com
 2. Выберите существующий проект из выпадающего списка вверху
 3. Перейдите в "APIs & Services" → "Credentials"
@@ -63,13 +68,15 @@
 ## Важные моменты
 
 - **Регион проекта не влияет на OAuth** - вы можете выбрать любой регион или "No organization"
-- **Для локальной разработки** достаточно добавить только `http://localhost:3000/api/auth/callback/google`
-- **Для production** добавьте URL вашего Vercel домена
+- **Для локальной разработки** добавьте: `http://localhost:3000/api/auth/callback/google`
+- **Для production (Vercel)** добавьте: `https://your-domain.vercel.app/api/auth/callback/google`
+- **Можно добавить оба URI** в один OAuth Client ID - это позволит работать и локально, и на Vercel
 - **Client Secret** - это секретная информация, не публикуйте её в git
 
 ## Проверка настройки
 
 После добавления переменных в `.env.local`, перезапустите dev-сервер:
+
 ```powershell
 npm run dev
 ```
@@ -79,8 +86,8 @@ npm run dev
 ## Troubleshooting
 
 Если возникают ошибки:
+
 1. Проверьте, что redirect URI точно совпадает (включая http/https и порт)
 2. Убедитесь, что Google+ API включен
 3. Проверьте, что OAuth consent screen настроен
 4. Для production: убедитесь, что добавили production redirect URI в Google Console
-
