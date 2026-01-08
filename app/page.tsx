@@ -78,6 +78,34 @@ export default async function Home() {
         <strong>Статус:</strong> Подключение к базе данных работает! Найдено
         заметок: {notes.length}
       </div>
+
+      <div
+        style={{
+          marginTop: "2rem",
+          padding: "1.5rem",
+          background: "white",
+          borderRadius: "8px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h2 style={{ marginBottom: "1rem", fontSize: "1.25rem" }}>
+          Инструменты
+        </h2>
+        <a
+          href="/view-db"
+          style={{
+            display: "inline-block",
+            padding: "0.75rem 1.5rem",
+            background: "#0070f3",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: "4px",
+            fontSize: "1rem",
+          }}
+        >
+          Просмотр базы данных →
+        </a>
+      </div>
     </main>
   );
 }

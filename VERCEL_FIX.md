@@ -52,3 +52,4 @@ npx prisma migrate deploy
 ### Вариант 3: Использовать Vercel Post-Deploy Hook
 Настройте webhook или функцию, которая применяет миграции после деплоя.
 
+

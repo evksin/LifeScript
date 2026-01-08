@@ -10,11 +10,102 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String       @id @default(cuid())
+  email     String       @unique
+  name      String?
+  createdAt DateTime     @default(now())
+
+  notes       Note[]
+  lifeScripts LifeScript[]
+  votes       Vote[]
+
+  @@map("users")
+}
+
 model Note {
   id        String   @id @default(uuid())
+  ownerId   String
   title     String
   createdAt DateTime @default(now())
 
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
   @@map("notes")
+}
+
+model Category {
+  id       String       @id @default(uuid())
+  category String       @unique
+
+  lifeScripts LifeScript[]
+
+  @@map("categories")
+}
+
+model LifeScript {
+  id          String            @id @default(uuid())
+  ownerId     String
+  title       String
+  content     String
+  description String?
+  categoryId  String
+  visibility  Visibility        @default(PRIVATE)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  publishedAt DateTime?
+
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  votes    Vote[]
+  tags     TagOnLifeScript[]
+
+  @@index([ownerId, updatedAt])
+  @@index([visibility, createdAt])
+  @@map("life_scripts")
+}
+
+model Tag {
+  id   String @id @default(uuid())
+  name String @unique
+
+  lifeScripts TagOnLifeScript[]
+
+  @@map("tags")
+}
+
+model TagOnLifeScript {
+  id           String     @id @default(uuid())
+  lifeScriptId String
+  tagId        String
+  createdAt    DateTime   @default(now())
+
+  lifeScript LifeScript @relation(fields: [lifeScriptId], references: [id], onDelete: Cascade)
+  tag        Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([lifeScriptId, tagId])
+  @@map("tag_on_life_script")
+}
+
+model Vote {
+  id           String     @id @default(uuid())
+  userId       String
+  lifeScriptId String
+  value        Int        @default(1)
+  createdAt    DateTime   @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lifeScript LifeScript @relation(fields: [lifeScriptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lifeScriptId])
+  @@index([lifeScriptId])
+  @@index([userId])
+  @@map("votes")
+}
+
+enum Visibility {
+  PRIVATE
+  PUBLIC
 }
 
