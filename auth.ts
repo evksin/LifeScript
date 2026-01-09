@@ -37,12 +37,17 @@ function initNextAuth() {
   }
 
   try {
+    // После validateEnvVars() мы знаем, что переменные установлены
+    const clientId = process.env.GOOGLE_CLIENT_ID!;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
+    const authSecret = process.env.AUTH_SECRET!;
+    
     nextAuthConfig = {
     adapter: PrismaAdapter(prisma) as any,
     providers: [
       Google({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        clientId,
+        clientSecret,
       }),
     ],
   callbacks: {
@@ -110,7 +115,7 @@ function initNextAuth() {
       signIn: "/login",
       error: "/api/auth/error",
     },
-    secret: process.env.AUTH_SECRET,
+    secret: authSecret,
     debug: process.env.NODE_ENV === "development",
     basePath: "/api/auth",
     // trustHost не поддерживается в типах NextAuth v5, но функциональность работает
