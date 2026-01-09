@@ -34,7 +34,7 @@ try {
       }),
     ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, profile }: { user: any; account: any; profile?: any }) {
       // Разрешаем вход для всех пользователей Google
       if (process.env.NODE_ENV === "development") {
         console.log("[NextAuth] signIn callback:", {
@@ -47,7 +47,7 @@ try {
       }
       return true;
     },
-    async redirect({ url, baseUrl }) {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
       if (process.env.NODE_ENV === "development") {
         console.log("[NextAuth] redirect callback:", { url, baseUrl });
       }
@@ -77,7 +77,7 @@ try {
       // По умолчанию редиректим на dashboard
       return `${baseUrl}/dashboard`;
     },
-    session: async ({ session, token, user }) => {
+    session: async ({ session, token, user }: { session: any; token: any; user?: any }) => {
       if (session?.user) {
         if (user) {
           session.user.id = user.id;
@@ -87,7 +87,7 @@ try {
       }
       return session;
     },
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user }: { token: any; user?: any }) => {
       if (user) {
         token.id = user.id;
       }
