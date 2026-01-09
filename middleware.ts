@@ -1,11 +1,12 @@
-import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const session = await auth();
+  // Проверяем наличие токена сессии в cookies
+  const sessionToken = request.cookies.get("authjs.session-token")?.value || 
+                       request.cookies.get("__Secure-authjs.session-token")?.value;
   
-  if (!session) {
+  if (!sessionToken) {
     const url = new URL("/login", request.url);
     url.searchParams.set("callbackUrl", request.url);
     return NextResponse.redirect(url);
