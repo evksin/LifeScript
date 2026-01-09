@@ -1,6 +1,9 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
+// Отключаем статическую генерацию, так как страница требует авторизации
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 

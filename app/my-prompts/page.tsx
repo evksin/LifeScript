@@ -2,6 +2,9 @@ import { getCurrentUser, getUserId } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
+// Отключаем статическую генерацию, так как страница требует авторизации
+export const dynamic = 'force-dynamic';
+
 export default async function MyPromptsPage() {
   const user = await getCurrentUser();
   const userId = await getUserId();
