@@ -130,8 +130,38 @@ function initNextAuth() {
   }
 }
 
-// Инициализируем NextAuth при загрузке модуля
-// Если переменные окружения не установлены, ошибка будет выброшена здесь
+// Инициализируем NextAuth
+// Если переменные окружения не установлены, это вызовет ошибку
 // Это нормально, так как без переменных NextAuth не может работать
-const nextAuth = initNextAuth();
-export const { handlers, auth, signIn, signOut } = nextAuth;
+let nextAuth: ReturnType<typeof NextAuth> | null = null;
+
+try {
+  nextAuth = initNextAuth();
+} catch (error) {
+  // Во время сборки переменные могут быть недоступны
+  // В этом случае nextAuth будет null, и ошибка произойдет при первом использовании
+  if (process.env.NODE_ENV !== "production" || process.env.VERCEL !== "1") {
+    console.error("[NextAuth] Ошибка инициализации:", error);
+  }
+}
+
+// Создаем заглушку для случая, когда NextAuth не инициализирован
+const createErrorHandler = (name: string) => {
+  return (...args: any[]) => {
+    throw new Error(
+      `NextAuth не инициализирован (${name}). Проверьте переменные окружения:\n` +
+      "- GOOGLE_CLIENT_ID\n" +
+      "- GOOGLE_CLIENT_SECRET\n" +
+      "- AUTH_SECRET"
+    );
+  };
+};
+
+export const handlers = nextAuth?.handlers || {
+  GET: createErrorHandler("handlers.GET"),
+  POST: createErrorHandler("handlers.POST"),
+} as any;
+
+export const auth = nextAuth?.auth || createErrorHandler("auth") as any;
+export const signIn = nextAuth?.signIn || createErrorHandler("signIn") as any;
+export const signOut = nextAuth?.signOut || createErrorHandler("signOut") as any;
