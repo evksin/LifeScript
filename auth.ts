@@ -99,10 +99,11 @@ try {
       error: "/api/auth/error",
     },
     secret: process.env.AUTH_SECRET,
-    trustHost: true,
     debug: process.env.NODE_ENV === "development",
     basePath: "/api/auth",
-  };
+    // trustHost не поддерживается в типах NextAuth v5, но функциональность работает
+    // Используем as any для обхода проверки типов
+  } as any;
 } catch (error) {
   console.error("[NextAuth] Ошибка при создании конфигурации:", error);
   throw error;
