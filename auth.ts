@@ -36,9 +36,20 @@ function validateEnvVars() {
 
 // В NextAuth v5 используется AUTH_URL, но поддерживается и NEXTAUTH_URL
 const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
-if (process.env.NODE_ENV === "development" && !authUrl) {
+
+// Логируем информацию о URL для диагностики (всегда, не только в development)
+console.log("[NextAuth] URL конфигурация:", {
+  AUTH_URL: process.env.AUTH_URL ? "установлен" : "не установлен",
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL ? "установлен" : "не установлен",
+  VERCEL_URL: process.env.VERCEL_URL || "не установлен",
+  authUrl: authUrl || "не установлен",
+  NODE_ENV: process.env.NODE_ENV,
+  VERCEL: process.env.VERCEL || "не установлен",
+});
+
+if (!authUrl && (process.env.NODE_ENV === "production" || process.env.VERCEL)) {
   console.warn(
-    "[NextAuth] Предупреждение: AUTH_URL или NEXTAUTH_URL не установлен. NextAuth попытается определить URL автоматически."
+    "[NextAuth] ВНИМАНИЕ: AUTH_URL или NEXTAUTH_URL не установлен в production! Это может вызвать ошибку Configuration."
   );
 }
 
@@ -61,12 +72,26 @@ function initNextAuth() {
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
     const authSecret = process.env.AUTH_SECRET!;
     
+    console.log("[NextAuth] Инициализация провайдера Google:", {
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+      hasAuthSecret: !!authSecret,
+      authUrl: authUrl || "не установлен",
+    });
+    
     nextAuthConfig = {
     adapter: PrismaAdapter(prisma) as any,
     providers: [
       Google({
         clientId,
         clientSecret,
+        authorization: {
+          params: {
+            prompt: "consent",
+            access_type: "offline",
+            response_type: "code",
+          },
+        },
       }),
     ],
   callbacks: {
