@@ -9,14 +9,22 @@ function LoginForm() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const error = searchParams.get("error");
 
   useEffect(() => {
-    console.log("LoginForm: status =", status, "session =", session?.user?.email || "нет");
+    console.log("LoginForm: status =", status, "session =", session?.user?.email || "нет", "error =", error);
+    
+    // Если есть ошибка в URL, не делаем редирект
+    if (error) {
+      console.log("Обнаружена ошибка в URL:", error);
+      return;
+    }
+    
     if (status === "authenticated" && session) {
       console.log("Пользователь авторизован, редирект на:", callbackUrl);
       router.replace(callbackUrl);
     }
-  }, [status, session, callbackUrl, router]);
+  }, [status, session, callbackUrl, router, error]);
 
   const handleGoogleSignIn = () => {
     // Используем прямой редирект на NextAuth signin endpoint
@@ -66,6 +74,38 @@ function LoginForm() {
         >
           Войдите в свой аккаунт, чтобы продолжить
         </p>
+
+        {error && (
+          <div
+            style={{
+              padding: "1rem",
+              marginBottom: "1.5rem",
+              background: "#fee",
+              border: "1px solid #fcc",
+              borderRadius: "8px",
+              color: "#c33",
+            }}
+          >
+            <strong>Ошибка:</strong>{" "}
+            {error === "Configuration"
+              ? "Проблема с конфигурацией сервера. Проверьте настройки."
+              : error === "AccessDenied"
+              ? "Доступ запрещён."
+              : error === "Verification"
+              ? "Ссылка для верификации больше не действительна."
+              : error === "OAuthAccountNotLinked"
+              ? "Этот email уже используется с другим провайдером."
+              : error === "OAuthCallback"
+              ? "Ошибка при обработке OAuth callback. Проверьте redirect URI в Google Console."
+              : error === "OAuthCreateAccount"
+              ? "Не удалось создать аккаунт. Проверьте подключение к базе данных."
+              : `Произошла ошибка при входе: ${error}`}
+          </div>
+        )}
+
+        {status === "loading" && (
+          <p style={{ color: "#666", marginBottom: "1.5rem" }}>Загрузка...</p>
+        )}
 
         <button
           onClick={handleGoogleSignIn}
