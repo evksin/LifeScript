@@ -12,6 +12,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Разрешаем вход для всех пользователей Google
+      if (account?.provider === "google") {
+        return true;
+      }
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      // Если URL начинается с "/", это относительный путь - используем baseUrl
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      // Если URL начинается с baseUrl, разрешаем редирект
+      if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      // По умолчанию редиректим на dashboard
+      return `${baseUrl}/dashboard`;
+    },
     session: async ({ session, token, user }) => {
       if (session?.user) {
         if (user) {
@@ -35,4 +54,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.AUTH_SECRET,
   trustHost: true,
+  debug: process.env.NODE_ENV === "development",
 });

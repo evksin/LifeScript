@@ -18,7 +18,10 @@ function LoginForm() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn("google", { callbackUrl });
+      await signIn("google", { 
+        callbackUrl: callbackUrl,
+        redirect: true,
+      });
     } catch (error) {
       console.error("Ошибка при входе:", error);
       alert("Ошибка при входе. Проверьте консоль браузера.");

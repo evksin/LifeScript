@@ -12,6 +12,13 @@ function ErrorContent() {
     Configuration: "Проблема с конфигурацией сервера. Проверьте настройки.",
     AccessDenied: "Доступ запрещён.",
     Verification: "Ссылка для верификации больше не действительна.",
+    OAuthAccountNotLinked: "Этот email уже используется с другим провайдером.",
+    OAuthCallback:
+      "Ошибка при обработке OAuth callback. Проверьте redirect URI в Google Console.",
+    OAuthCreateAccount:
+      "Не удалось создать аккаунт. Проверьте подключение к базе данных.",
+    CallbackRouteError:
+      "Ошибка в callback роуте. Проверьте переменные окружения.",
     Default: "Произошла ошибка при входе.",
   };
 
