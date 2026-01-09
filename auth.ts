@@ -177,12 +177,12 @@ function initNextAuth() {
     // Это позволяет NextAuth автоматически определять baseUrl из заголовков запроса
     // НЕ используем baseUrl вместе с trustHost, так как это может конфликтовать
     trustHost: true,
-    // Явно устанавливаем baseUrl, если AUTH_URL установлен (для надежности)
-    ...(authUrl ? { baseUrl: authUrl } : {}),
     // Используем as any для обхода проверки типов (trustHost может не быть в типах beta версии)
     } as any;
     
+    console.log("[NextAuth] Конфигурация NextAuth создана, инициализируем NextAuth...");
     nextAuthInstance = NextAuth(nextAuthConfig);
+    console.log("[NextAuth] NextAuth инициализирован, тип:", typeof nextAuthInstance);
     
     // Сохраняем handlers напрямую из instance
     // В NextAuth v5 handlers доступен как свойство возвращаемого объекта
