@@ -271,20 +271,67 @@ function createHandler(method: "GET" | "POST") {
   return (req: Request) => {
     try {
       const url = req instanceof Request ? req.url : (req as any).url || "unknown";
-      console.log(`[NextAuth] ${method} запрос к:`, url);
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      
+      console.log(`[NextAuth] ${method} запрос к:`, pathname);
+      console.log(`[NextAuth] Полный URL:`, url);
+      
+      // Логируем заголовки для диагностики
+      try {
+        const headers: Record<string, string> = {};
+        if (req instanceof Request && req.headers) {
+          const headerNames = ['host', 'origin', 'referer', 'x-forwarded-host', 'x-forwarded-proto', 'x-vercel-deployment-url'];
+          headerNames.forEach(name => {
+            const value = req.headers.get(name);
+            if (value) headers[name] = value;
+          });
+        }
+        if (Object.keys(headers).length > 0) {
+          console.log(`[NextAuth] Заголовки запроса:`, headers);
+        }
+      } catch (e) {
+        console.log(`[NextAuth] Не удалось прочитать заголовки:`, e);
+      }
+      
+      // Для запросов к signin, логируем дополнительную информацию
+      if (pathname.includes("/signin")) {
+        console.log(`[NextAuth] Запрос к signin, проверяем конфигурацию:`, {
+          AUTH_URL: process.env.AUTH_URL || "не установлен",
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL || "не установлен",
+          VERCEL_URL: process.env.VERCEL_URL || "не установлен",
+          trustHost: true,
+        });
+      }
       
       const { handlers } = ensureInitialized();
       if (!handlers || !handlers[method]) {
         throw new Error(`NextAuth handlers.${method} не доступен после инициализации`);
       }
       
-      console.log(`[NextAuth] Вызов handlers.${method} для:`, url);
+      console.log(`[NextAuth] Вызов handlers.${method} для:`, pathname);
       const response = handlers[method](req);
-      console.log(`[NextAuth] handlers.${method} вернул ответ для:`, url);
+      console.log(`[NextAuth] handlers.${method} вернул ответ для:`, pathname);
+      
+      // Если ответ - редирект, логируем его
+      if (response instanceof Response) {
+        const status = response.status;
+        const location = response.headers.get("location");
+        if (status >= 300 && status < 400 && location) {
+          console.log(`[NextAuth] Редирект (${status}) на:`, location);
+        }
+        if (status >= 400) {
+          console.log(`[NextAuth] Ошибка (${status}) в ответе`);
+        }
+      }
       
       return response;
     } catch (error) {
       console.error(`[NextAuth] Ошибка в handlers.${method}:`, error);
+      if (error instanceof Error) {
+        console.error(`[NextAuth] Сообщение об ошибке:`, error.message);
+        console.error(`[NextAuth] Стек ошибки:`, error.stack);
+      }
       const errorMessage = error instanceof Error ? error.message : String(error);
       return new Response(
         JSON.stringify({
