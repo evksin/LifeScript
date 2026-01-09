@@ -173,13 +173,10 @@ function initNextAuth() {
     secret: authSecret,
     debug: process.env.NODE_ENV === "development", // Debug только в development
     basePath: "/api/auth",
-    // Явно устанавливаем baseUrl из AUTH_URL, если он установлен
-    // Это более надежно, чем полагаться только на trustHost
-    ...(authUrl ? { baseUrl: authUrl } : {}),
-    // Для NextAuth v5 на Vercel также используем trustHost: true как fallback
-    // Это позволяет NextAuth автоматически определять baseUrl из заголовков запроса, если baseUrl не установлен
-    trustHost: true,
-    // Используем as any для обхода проверки типов (trustHost может не быть в типах beta версии)
+    // Явно устанавливаем baseUrl из AUTH_URL
+    // В NextAuth v5 beta baseUrl и trustHost могут конфликтовать, поэтому используем только baseUrl
+    baseUrl: authUrl || undefined,
+    // Используем as any для обхода проверки типов
     } as any;
     
     console.log("[NextAuth] Конфигурация NextAuth создана, инициализируем NextAuth...");
