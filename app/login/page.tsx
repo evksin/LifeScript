@@ -11,16 +11,12 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   useEffect(() => {
+    console.log("LoginForm: status =", status, "session =", session?.user?.email || "нет");
     if (status === "authenticated" && session) {
       console.log("Пользователь авторизован, редирект на:", callbackUrl);
-      router.push(callbackUrl);
+      router.replace(callbackUrl);
     }
   }, [status, session, callbackUrl, router]);
-  
-  // Предотвращаем показ формы, если пользователь уже авторизован
-  if (status === "authenticated") {
-    return null; // Компонент не рендерится, происходит редирект
-  }
 
   const handleGoogleSignIn = async () => {
     try {
@@ -50,26 +46,8 @@ function LoginForm() {
     }
   };
 
-  if (status === "loading") {
-    return (
-      <main
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <p>Загрузка...</p>
-          <p style={{ fontSize: "0.875rem", color: "#666", marginTop: "1rem" }}>
-            Проверка сессии...
-          </p>
-        </div>
-      </main>
-    );
-  }
-
+  // Показываем форму сразу, даже если статус loading, чтобы избежать белого экрана
+  // Если пользователь авторизован, произойдет редирект через useEffect
   return (
     <main
       style={{
