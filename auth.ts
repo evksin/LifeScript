@@ -22,14 +22,17 @@ if (process.env.NODE_ENV === "development" && !authUrl) {
   );
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma) as any,
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+// Инициализируем NextAuth с обработкой ошибок
+let nextAuthConfig;
+try {
+  nextAuthConfig = {
+    adapter: PrismaAdapter(prisma) as any,
+    providers: [
+      Google({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      }),
+    ],
   callbacks: {
     async signIn({ user, account, profile }) {
       // Разрешаем вход для всех пользователей Google
@@ -91,12 +94,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
   },
-  pages: {
-    signIn: "/login",
-    error: "/api/auth/error",
-  },
-  secret: process.env.AUTH_SECRET,
-  trustHost: true,
-  debug: process.env.NODE_ENV === "development",
-  basePath: "/api/auth",
-});
+    pages: {
+      signIn: "/login",
+      error: "/api/auth/error",
+    },
+    secret: process.env.AUTH_SECRET,
+    trustHost: true,
+    debug: process.env.NODE_ENV === "development",
+    basePath: "/api/auth",
+  };
+} catch (error) {
+  console.error("[NextAuth] Ошибка при создании конфигурации:", error);
+  throw error;
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth(nextAuthConfig);
