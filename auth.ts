@@ -96,13 +96,14 @@ function initNextAuth() {
     ],
   callbacks: {
     async signIn({ user, account, profile }: { user: any; account: any; profile?: any }) {
+      // Логируем всегда для диагностики
+      console.log("[NextAuth] signIn callback:", {
+        user: user?.email,
+        provider: account?.provider,
+        hasAccount: !!account,
+        hasProfile: !!profile,
+      });
       // Разрешаем вход для всех пользователей Google
-      if (process.env.NODE_ENV === "development") {
-        console.log("[NextAuth] signIn callback:", {
-          user: user?.email,
-          provider: account?.provider,
-        });
-      }
       if (account?.provider === "google") {
         return true;
       }
@@ -160,14 +161,12 @@ function initNextAuth() {
       error: "/api/auth/error",
     },
     secret: authSecret,
-    debug: process.env.NODE_ENV === "development",
+    debug: true, // Включаем debug для диагностики
     basePath: "/api/auth",
     // Для NextAuth v5 на Vercel нужно использовать trustHost: true
     // Это позволяет NextAuth автоматически определять baseUrl из заголовков запроса
+    // НЕ используем baseUrl вместе с trustHost, так как это может конфликтовать
     trustHost: true,
-    // Для NextAuth v5 на Vercel нужно явно указать baseUrl
-    // Используем authUrl если он установлен, иначе NextAuth попытается определить автоматически
-    ...(authUrl ? { baseUrl: authUrl } : {}),
     // Используем as any для обхода проверки типов (trustHost может не быть в типах beta версии)
     } as any;
     
