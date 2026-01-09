@@ -45,13 +45,14 @@ if (process.env.NODE_ENV === "development" && !authUrl) {
 // Инициализируем NextAuth с обработкой ошибок
 let nextAuthConfig;
 let nextAuthInstance: ReturnType<typeof NextAuth> | null = null;
+let nextAuthHandlers: any = null;
 
 function initNextAuth() {
   // Проверяем переменные окружения только во время выполнения
   validateEnvVars();
   
-  if (nextAuthInstance) {
-    return nextAuthInstance;
+  if (nextAuthInstance && nextAuthHandlers) {
+    return { instance: nextAuthInstance, handlers: nextAuthHandlers };
   }
 
   try {
@@ -141,7 +142,31 @@ function initNextAuth() {
     } as any;
     
     nextAuthInstance = NextAuth(nextAuthConfig);
-    return nextAuthInstance;
+    
+    // Сохраняем handlers напрямую из instance
+    // В NextAuth v5 handlers доступен как свойство возвращаемого объекта
+    // Проверяем различные способы доступа к handlers
+    if (nextAuthInstance && typeof nextAuthInstance === 'object') {
+      // Пробуем получить handlers разными способами
+      nextAuthHandlers = ((nextAuthInstance as any).handlers || 
+                        (nextAuthInstance as any)?.handlers ||
+                        null) as any;
+      
+      if (!nextAuthHandlers) {
+        // Логируем полную структуру объекта для диагностики
+        console.warn("[NextAuth] handlers не доступен после инициализации NextAuth");
+        console.warn("[NextAuth] Тип nextAuthInstance:", typeof nextAuthInstance);
+        console.warn("[NextAuth] nextAuthInstance:", nextAuthInstance);
+        console.warn("[NextAuth] Ключи nextAuthInstance:", Object.keys(nextAuthInstance || {}));
+        console.warn("[NextAuth] nextAuthInstance.handlers:", (nextAuthInstance as any).handlers);
+      } else {
+        console.log("[NextAuth] handlers успешно получен");
+      }
+    } else {
+      console.error("[NextAuth] nextAuthInstance не является объектом:", typeof nextAuthInstance);
+    }
+    
+    return { instance: nextAuthInstance, handlers: nextAuthHandlers };
   } catch (error) {
     console.error("[NextAuth] Ошибка при создании конфигурации:", error);
     throw error;
@@ -156,7 +181,11 @@ let nextAuth: ReturnType<typeof NextAuth> | null = null;
 // Пытаемся инициализировать NextAuth при загрузке модуля
 // Если это не удается, попробуем при первом использовании
 try {
-  nextAuth = initNextAuth();
+  const result = initNextAuth();
+  nextAuth = result.instance;
+  if (result.handlers) {
+    nextAuthHandlers = result.handlers;
+  }
   console.log("[NextAuth] Успешно инициализирован при загрузке модуля");
 } catch (error) {
   // Логируем ошибку всегда, чтобы видеть её в логах Vercel
@@ -174,7 +203,11 @@ function ensureInitialized() {
   if (!nextAuth) {
     try {
       console.log("[NextAuth] Попытка инициализации при первом использовании...");
-      nextAuth = initNextAuth();
+      const result = initNextAuth();
+      nextAuth = result.instance;
+      if (result.handlers) {
+        nextAuthHandlers = result.handlers;
+      }
       console.log("[NextAuth] Успешно инициализирован при первом использовании");
     } catch (error) {
       console.error("[NextAuth] Ошибка инициализации при первом использовании:", error);
@@ -184,18 +217,35 @@ function ensureInitialized() {
       throw error;
     }
   }
-  return nextAuth;
+  
+  // Если handlers не был сохранен, попробуем получить его из instance
+  if (!nextAuthHandlers && nextAuth) {
+    try {
+      nextAuthHandlers = (nextAuth.handlers as any) || null;
+      if (nextAuthHandlers) {
+        console.log("[NextAuth] handlers получен из instance при первом использовании");
+      }
+    } catch (e) {
+      console.warn("[NextAuth] Не удалось получить handlers из instance:", e);
+    }
+  }
+  
+  if (!nextAuthHandlers) {
+    throw new Error("NextAuth handlers не доступен после инициализации");
+  }
+  
+  return { instance: nextAuth, handlers: nextAuthHandlers };
 }
 
 // Создаем функцию для обработки ошибок инициализации
 function createHandler(method: "GET" | "POST") {
   return (req: Request) => {
     try {
-      const auth = ensureInitialized();
-      if (!auth || !auth.handlers || !auth.handlers[method]) {
+      const { handlers } = ensureInitialized();
+      if (!handlers || !handlers[method]) {
         throw new Error(`NextAuth handlers.${method} не доступен после инициализации`);
       }
-      return auth.handlers[method](req);
+      return handlers[method](req);
     } catch (error) {
       console.error(`[NextAuth] Ошибка в handlers.${method}:`, error);
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -222,22 +272,20 @@ const handlersObject = {
 };
 
 // Экспортируем handlers, гарантируя, что он всегда определен
-export const handlers: {
-  GET: (req: Request) => Promise<Response> | Response;
-  POST: (req: Request) => Promise<Response> | Response;
-} = handlersObject;
+// В NextAuth v5 handlers используют NextRequest из Next.js
+export const handlers = handlersObject as any;
 
 export const auth = () => {
-  const authInstance = ensureInitialized();
-  return authInstance.auth();
+  const { instance } = ensureInitialized();
+  return instance.auth();
 };
 
 export const signIn = (...args: Parameters<ReturnType<typeof NextAuth>["signIn"]>) => {
-  const authInstance = ensureInitialized();
-  return authInstance.signIn(...args);
+  const { instance } = ensureInitialized();
+  return instance.signIn(...args);
 };
 
 export const signOut = (...args: Parameters<ReturnType<typeof NextAuth>["signOut"]>) => {
-  const authInstance = ensureInitialized();
-  return authInstance.signOut(...args);
+  const { instance } = ensureInitialized();
+  return instance.signOut(...args);
 };
