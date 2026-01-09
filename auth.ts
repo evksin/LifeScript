@@ -77,7 +77,17 @@ function initNextAuth() {
       hasClientSecret: !!clientSecret,
       hasAuthSecret: !!authSecret,
       authUrl: authUrl || "не установлен",
+      AUTH_URL: process.env.AUTH_URL || "не установлен",
+      NEXTAUTH_URL: process.env.NEXTAUTH_URL || "не установлен",
+      VERCEL_URL: process.env.VERCEL_URL || "не установлен",
     });
+    
+    // Предупреждение, если AUTH_URL не установлен в production
+    if (!authUrl && (process.env.NODE_ENV === "production" || process.env.VERCEL)) {
+      console.error("[NextAuth] КРИТИЧЕСКАЯ ОШИБКА: AUTH_URL или NEXTAUTH_URL не установлен!");
+      console.error("[NextAuth] Это вызовет ошибку 'Configuration' при попытке входа.");
+      console.error("[NextAuth] Установите AUTH_URL=https://life-script-swart.vercel.app на Vercel.");
+    }
     
     nextAuthConfig = {
     adapter: PrismaAdapter(prisma) as any,
@@ -167,6 +177,8 @@ function initNextAuth() {
     // Это позволяет NextAuth автоматически определять baseUrl из заголовков запроса
     // НЕ используем baseUrl вместе с trustHost, так как это может конфликтовать
     trustHost: true,
+    // Явно устанавливаем baseUrl, если AUTH_URL установлен (для надежности)
+    ...(authUrl ? { baseUrl: authUrl } : {}),
     // Используем as any для обхода проверки типов (trustHost может не быть в типах beta версии)
     } as any;
     
