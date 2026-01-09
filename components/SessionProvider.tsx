@@ -8,9 +8,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     <NextAuthSessionProvider
       refetchInterval={0}
       refetchOnWindowFocus={false}
-      onError={(error) => {
-        console.error("[SessionProvider] Ошибка сессии:", error);
-      }}
     >
       {children}
     </NextAuthSessionProvider>
