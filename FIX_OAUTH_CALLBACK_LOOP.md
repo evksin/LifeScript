@@ -1,15 +1,18 @@
 # Исправление бесконечного цикла OAuth callback
 
 ## Проблема:
+
 После выбора аккаунта Google происходит возврат к форме входа вместо редиректа на `/dashboard`.
 
 ## Что исправлено:
 
 1. **Улучшен callback `redirect`:**
+
    - Теперь предотвращает редирект на `/login` после успешной авторизации
    - Всегда редиректит на `/dashboard` после успешного входа
 
 2. **Добавлено логирование:**
+
    - В development режиме будут видны логи в консоли сервера
    - Это поможет понять, что происходит при обработке callback
 
@@ -31,16 +34,19 @@
 **Должны быть ТОЧНО такие URL:**
 
 Для локального хоста:
+
 ```
 http://localhost:3000/api/auth/callback/google
 ```
 
 Для Vercel:
+
 ```
 https://life-script-swart.vercel.app/api/auth/callback/google
 ```
 
 ⚠️ **КРИТИЧНО:**
+
 - URL должен быть **ТОЧНО** таким же (без лишних слешей, без пробелов)
 - `http://` для localhost, `https://` для Vercel
 - После изменения подождите 2-3 минуты
@@ -48,11 +54,13 @@ https://life-script-swart.vercel.app/api/auth/callback/google
 ### 2. Проверьте базу данных
 
 Убедитесь, что:
+
 - Миграции применены: `npm run db:migrate`
 - Таблицы `users`, `accounts`, `sessions` существуют
 - База данных доступна
 
 **Проверка:**
+
 ```powershell
 npx prisma studio
 ```
@@ -62,34 +70,40 @@ npx prisma studio
 ### 3. Проверьте переменные окружения
 
 **Локально:**
+
 ```powershell
 Get-Content .env.local | Select-String -Pattern "GOOGLE|AUTH|DATABASE"
 ```
 
 **На Vercel:**
+
 - Vercel Dashboard → Settings → Environment Variables
 - Убедитесь, что все переменные добавлены для **Production**
 
 ### 4. Проверьте логи
 
 **Локально:**
+
 - Проверьте терминал, где запущен `npm run dev`
 - После попытки входа должны появиться логи:
   - `[NextAuth] signIn callback: ...`
   - `[NextAuth] redirect callback: ...`
 
 **На Vercel:**
+
 - Vercel Dashboard → Deployments → последний деплой → Logs
 - Ищите ошибки при обработке callback
 
 ## Диагностика:
 
 1. **Проверьте URL после выбора аккаунта:**
+
    - После выбора аккаунта Google посмотрите на URL в браузере
    - Должен быть редирект на `/api/auth/callback/google?code=...`
    - Если URL другой - проблема с redirect URI
 
 2. **Проверьте сессию:**
+
    - После callback откройте: `/api/auth/session`
    - Должна вернуться информация о пользователе
    - Если пусто - сессия не создается
@@ -115,4 +129,3 @@ Get-Content .env.local | Select-String -Pattern "GOOGLE|AUTH|DATABASE"
 5. ✅ Проверьте базу данных (создаются ли пользователи)
 
 После исправления redirect URI и пересборки проекта на Vercel проблема должна решиться.
-
