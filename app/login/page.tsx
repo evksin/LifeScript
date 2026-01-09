@@ -12,16 +12,38 @@ function LoginForm() {
 
   useEffect(() => {
     if (status === "authenticated" && session) {
+      console.log("Пользователь авторизован, редирект на:", callbackUrl);
       router.push(callbackUrl);
     }
   }, [status, session, callbackUrl, router]);
+  
+  // Предотвращаем показ формы, если пользователь уже авторизован
+  if (status === "authenticated") {
+    return null; // Компонент не рендерится, происходит редирект
+  }
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn("google", { 
+      console.log("Начинаем вход через Google...");
+      const result = await signIn("google", { 
         callbackUrl: callbackUrl,
-        redirect: true,
+        redirect: false, // Не делаем автоматический редирект, обработаем вручную
       });
+      
+      console.log("Результат signIn:", result);
+      
+      // Если signIn вернул URL, делаем редирект вручную
+      if (result?.url) {
+        window.location.href = result.url;
+      } else if (result?.error) {
+        console.error("Ошибка при входе:", result.error);
+        alert(`Ошибка при входе: ${result.error}`);
+      } else {
+        // Если нет ошибки и нет URL, возможно нужно проверить провайдер
+        console.warn("signIn не вернул URL или ошибку. Проверьте конфигурацию.");
+        // Попробуем прямой редирект на signin URL
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+      }
     } catch (error) {
       console.error("Ошибка при входе:", error);
       alert("Ошибка при входе. Проверьте консоль браузера.");
