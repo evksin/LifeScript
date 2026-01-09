@@ -153,40 +153,63 @@ function initNextAuth() {
 // Это нормально, так как без переменных NextAuth не может работать
 let nextAuth: ReturnType<typeof NextAuth> | null = null;
 
+// Пытаемся инициализировать NextAuth при загрузке модуля
+// Если это не удается, попробуем при первом использовании
 try {
   nextAuth = initNextAuth();
+  console.log("[NextAuth] Успешно инициализирован при загрузке модуля");
 } catch (error) {
   // Логируем ошибку всегда, чтобы видеть её в логах Vercel
-  console.error("[NextAuth] Ошибка инициализации:", error);
+  console.error("[NextAuth] Ошибка инициализации при загрузке модуля:", error);
   if (error instanceof Error) {
     console.error("[NextAuth] Сообщение об ошибке:", error.message);
     console.error("[NextAuth] Стек ошибки:", error.stack);
   }
-  // nextAuth останется null, и ошибка произойдет при первом использовании
+  // nextAuth останется null, попробуем инициализировать при первом использовании
+  console.warn("[NextAuth] NextAuth будет инициализирован при первом запросе");
 }
 
-// Создаем заглушку для случая, когда NextAuth не инициализирован
-const createErrorHandler = (name: string) => {
-  return (...args: any[]) => {
-    const errorMessage = 
-      `NextAuth не инициализирован (${name}). Проверьте переменные окружения:\n` +
-      "- GOOGLE_CLIENT_ID\n" +
-      "- GOOGLE_CLIENT_SECRET\n" +
-      "- AUTH_SECRET\n" +
-      "- AUTH_URL (опционально, но рекомендуется)";
-    
-    console.error(`[NextAuth] ${errorMessage}`);
-    console.error("[NextAuth] Проверьте логи Vercel для деталей ошибки инициализации");
-    
-    throw new Error(errorMessage);
-  };
-};
+// Функция для ленивой инициализации при первом использовании
+function ensureInitialized() {
+  if (!nextAuth) {
+    try {
+      console.log("[NextAuth] Попытка инициализации при первом использовании...");
+      nextAuth = initNextAuth();
+      console.log("[NextAuth] Успешно инициализирован при первом использовании");
+    } catch (error) {
+      console.error("[NextAuth] Ошибка инициализации при первом использовании:", error);
+      if (error instanceof Error) {
+        console.error("[NextAuth] Сообщение об ошибке:", error.message);
+      }
+      throw error;
+    }
+  }
+  return nextAuth;
+}
 
-export const handlers = nextAuth?.handlers || {
-  GET: createErrorHandler("handlers.GET"),
-  POST: createErrorHandler("handlers.POST"),
+// Создаем обертки, которые инициализируют NextAuth при первом использовании
+export const handlers = {
+  GET: (req: Request) => {
+    const auth = ensureInitialized();
+    return auth.handlers.GET(req);
+  },
+  POST: (req: Request) => {
+    const auth = ensureInitialized();
+    return auth.handlers.POST(req);
+  },
 } as any;
 
-export const auth = nextAuth?.auth || createErrorHandler("auth") as any;
-export const signIn = nextAuth?.signIn || createErrorHandler("signIn") as any;
-export const signOut = nextAuth?.signOut || createErrorHandler("signOut") as any;
+export const auth = () => {
+  const authInstance = ensureInitialized();
+  return authInstance.auth();
+};
+
+export const signIn = (...args: Parameters<ReturnType<typeof NextAuth>["signIn"]>) => {
+  const authInstance = ensureInitialized();
+  return authInstance.signIn(...args);
+};
+
+export const signOut = (...args: Parameters<ReturnType<typeof NextAuth>["signOut"]>) => {
+  const authInstance = ensureInitialized();
+  return authInstance.signOut(...args);
+};
