@@ -35,12 +35,14 @@ function validateEnvVars() {
 }
 
 // В NextAuth v5 используется AUTH_URL, но поддерживается и NEXTAUTH_URL
-const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+// Убираем trailing slash, если он есть
+const authUrlRaw = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+const authUrl = authUrlRaw ? authUrlRaw.replace(/\/$/, '') : undefined;
 
 // Логируем информацию о URL для диагностики (всегда, не только в development)
 console.log("[NextAuth] URL конфигурация:", {
-  AUTH_URL: process.env.AUTH_URL ? "установлен" : "не установлен",
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL ? "установлен" : "не установлен",
+  AUTH_URL: process.env.AUTH_URL ? `установлен (${process.env.AUTH_URL})` : "не установлен",
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL ? `установлен (${process.env.NEXTAUTH_URL})` : "не установлен",
   VERCEL_URL: process.env.VERCEL_URL || "не установлен",
   authUrl: authUrl || "не установлен",
   NODE_ENV: process.env.NODE_ENV,
@@ -180,7 +182,10 @@ function initNextAuth() {
     } as any;
     
     console.log("[NextAuth] Конфигурация NextAuth создана, инициализируем NextAuth...");
-    console.log("[NextAuth] baseUrl в конфигурации:", (nextAuthConfig as any).baseUrl || "не установлен (используется trustHost)");
+    console.log("[NextAuth] baseUrl в конфигурации:", (nextAuthConfig as any).baseUrl || "не установлен");
+    console.log("[NextAuth] authUrl значение:", authUrl || "не установлен");
+    console.log("[NextAuth] process.env.AUTH_URL:", process.env.AUTH_URL || "не установлен");
+    console.log("[NextAuth] process.env.NEXTAUTH_URL:", process.env.NEXTAUTH_URL || "не установлен");
     nextAuthInstance = NextAuth(nextAuthConfig);
     console.log("[NextAuth] NextAuth инициализирован, тип:", typeof nextAuthInstance);
     
