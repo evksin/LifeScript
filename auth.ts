@@ -3,15 +3,17 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-// Валидация переменных окружения
-if (!process.env.GOOGLE_CLIENT_ID) {
-  throw new Error("GOOGLE_CLIENT_ID не установлен в переменных окружения");
-}
-if (!process.env.GOOGLE_CLIENT_SECRET) {
-  throw new Error("GOOGLE_CLIENT_SECRET не установлен в переменных окружения");
-}
-if (!process.env.AUTH_SECRET) {
-  throw new Error("AUTH_SECRET не установлен в переменных окружения");
+// Валидация переменных окружения (только во время выполнения, не во время сборки)
+function validateEnvVars() {
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    throw new Error("GOOGLE_CLIENT_ID не установлен в переменных окружения");
+  }
+  if (!process.env.GOOGLE_CLIENT_SECRET) {
+    throw new Error("GOOGLE_CLIENT_SECRET не установлен в переменных окружения");
+  }
+  if (!process.env.AUTH_SECRET) {
+    throw new Error("AUTH_SECRET не установлен в переменных окружения");
+  }
 }
 
 // В NextAuth v5 используется AUTH_URL, но поддерживается и NEXTAUTH_URL
@@ -24,8 +26,18 @@ if (process.env.NODE_ENV === "development" && !authUrl) {
 
 // Инициализируем NextAuth с обработкой ошибок
 let nextAuthConfig;
-try {
-  nextAuthConfig = {
+let nextAuthInstance: ReturnType<typeof NextAuth> | null = null;
+
+function initNextAuth() {
+  // Проверяем переменные окружения только во время выполнения
+  validateEnvVars();
+  
+  if (nextAuthInstance) {
+    return nextAuthInstance;
+  }
+
+  try {
+    nextAuthConfig = {
     adapter: PrismaAdapter(prisma) as any,
     providers: [
       Google({
@@ -103,10 +115,18 @@ try {
     basePath: "/api/auth",
     // trustHost не поддерживается в типах NextAuth v5, но функциональность работает
     // Используем as any для обхода проверки типов
-  } as any;
-} catch (error) {
-  console.error("[NextAuth] Ошибка при создании конфигурации:", error);
-  throw error;
+    } as any;
+    
+    nextAuthInstance = NextAuth(nextAuthConfig);
+    return nextAuthInstance;
+  } catch (error) {
+    console.error("[NextAuth] Ошибка при создании конфигурации:", error);
+    throw error;
+  }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth(nextAuthConfig);
+// Инициализируем NextAuth при загрузке модуля
+// Если переменные окружения не установлены, ошибка будет выброшена здесь
+// Это нормально, так как без переменных NextAuth не может работать
+const nextAuth = initNextAuth();
+export const { handlers, auth, signIn, signOut } = nextAuth;
