@@ -14,6 +14,14 @@ if (!process.env.AUTH_SECRET) {
   throw new Error("AUTH_SECRET не установлен в переменных окружения");
 }
 
+// В NextAuth v5 используется AUTH_URL, но поддерживается и NEXTAUTH_URL
+const authUrl = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+if (process.env.NODE_ENV === "development" && !authUrl) {
+  console.warn(
+    "[NextAuth] Предупреждение: AUTH_URL или NEXTAUTH_URL не установлен. NextAuth попытается определить URL автоматически."
+  );
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
   providers: [
@@ -90,6 +98,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET,
   trustHost: true,
   debug: process.env.NODE_ENV === "development",
-  // Явно указываем baseUrl для избежания проблем с определением порта
   basePath: "/api/auth",
 });
