@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
 
@@ -18,32 +18,11 @@ function LoginForm() {
     }
   }, [status, session, callbackUrl, router]);
 
-  const handleGoogleSignIn = async () => {
-    try {
-      console.log("Начинаем вход через Google...");
-      const result = await signIn("google", { 
-        callbackUrl: callbackUrl,
-        redirect: false, // Не делаем автоматический редирект, обработаем вручную
-      });
-      
-      console.log("Результат signIn:", result);
-      
-      // Если signIn вернул URL, делаем редирект вручную
-      if (result?.url) {
-        window.location.href = result.url;
-      } else if (result?.error) {
-        console.error("Ошибка при входе:", result.error);
-        alert(`Ошибка при входе: ${result.error}`);
-      } else {
-        // Если нет ошибки и нет URL, возможно нужно проверить провайдер
-        console.warn("signIn не вернул URL или ошибку. Проверьте конфигурацию.");
-        // Попробуем прямой редирект на signin URL
-        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
-      }
-    } catch (error) {
-      console.error("Ошибка при входе:", error);
-      alert("Ошибка при входе. Проверьте консоль браузера.");
-    }
+  const handleGoogleSignIn = () => {
+    // Используем прямой редирект на NextAuth signin endpoint
+    // Это позволяет NextAuth правильно обработать CSRF токен
+    const signInUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+    window.location.href = signInUrl;
   };
 
   // Показываем форму сразу, даже если статус loading, чтобы избежать белого экрана
