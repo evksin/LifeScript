@@ -187,17 +187,45 @@ function ensureInitialized() {
   return nextAuth;
 }
 
+// Создаем функцию для обработки ошибок инициализации
+function createHandler(method: "GET" | "POST") {
+  return (req: Request) => {
+    try {
+      const auth = ensureInitialized();
+      if (!auth || !auth.handlers || !auth.handlers[method]) {
+        throw new Error(`NextAuth handlers.${method} не доступен после инициализации`);
+      }
+      return auth.handlers[method](req);
+    } catch (error) {
+      console.error(`[NextAuth] Ошибка в handlers.${method}:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return new Response(
+        JSON.stringify({
+          error: "NextAuth не инициализирован",
+          message: errorMessage,
+          details: "Проверьте переменные окружения на Vercel: Settings → Environment Variables → Production",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  };
+}
+
 // Создаем обертки, которые инициализируют NextAuth при первом использовании
-export const handlers = {
-  GET: (req: Request) => {
-    const auth = ensureInitialized();
-    return auth.handlers.GET(req);
-  },
-  POST: (req: Request) => {
-    const auth = ensureInitialized();
-    return auth.handlers.POST(req);
-  },
-} as any;
+// handlers всегда определен, даже если NextAuth не инициализирован
+const handlersObject = {
+  GET: createHandler("GET"),
+  POST: createHandler("POST"),
+};
+
+// Экспортируем handlers, гарантируя, что он всегда определен
+export const handlers: {
+  GET: (req: Request) => Promise<Response> | Response;
+  POST: (req: Request) => Promise<Response> | Response;
+} = handlersObject;
 
 export const auth = () => {
   const authInstance = ensureInitialized();
