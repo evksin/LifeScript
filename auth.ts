@@ -161,7 +161,7 @@ function initNextAuth() {
       error: "/api/auth/error",
     },
     secret: authSecret,
-    debug: true, // Включаем debug для диагностики
+    debug: process.env.NODE_ENV === "development", // Debug только в development
     basePath: "/api/auth",
     // Для NextAuth v5 на Vercel нужно использовать trustHost: true
     // Это позволяет NextAuth автоматически определять baseUrl из заголовков запроса
