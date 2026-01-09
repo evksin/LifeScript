@@ -138,22 +138,29 @@ let nextAuth: ReturnType<typeof NextAuth> | null = null;
 try {
   nextAuth = initNextAuth();
 } catch (error) {
-  // Во время сборки переменные могут быть недоступны
-  // В этом случае nextAuth будет null, и ошибка произойдет при первом использовании
-  if (process.env.NODE_ENV !== "production" || process.env.VERCEL !== "1") {
-    console.error("[NextAuth] Ошибка инициализации:", error);
+  // Логируем ошибку всегда, чтобы видеть её в логах Vercel
+  console.error("[NextAuth] Ошибка инициализации:", error);
+  if (error instanceof Error) {
+    console.error("[NextAuth] Сообщение об ошибке:", error.message);
+    console.error("[NextAuth] Стек ошибки:", error.stack);
   }
+  // nextAuth останется null, и ошибка произойдет при первом использовании
 }
 
 // Создаем заглушку для случая, когда NextAuth не инициализирован
 const createErrorHandler = (name: string) => {
   return (...args: any[]) => {
-    throw new Error(
+    const errorMessage = 
       `NextAuth не инициализирован (${name}). Проверьте переменные окружения:\n` +
       "- GOOGLE_CLIENT_ID\n" +
       "- GOOGLE_CLIENT_SECRET\n" +
-      "- AUTH_SECRET"
-    );
+      "- AUTH_SECRET\n" +
+      "- AUTH_URL (опционально, но рекомендуется)";
+    
+    console.error(`[NextAuth] ${errorMessage}`);
+    console.error("[NextAuth] Проверьте логи Vercel для деталей ошибки инициализации");
+    
+    throw new Error(errorMessage);
   };
 };
 
