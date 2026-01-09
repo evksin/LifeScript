@@ -270,11 +270,19 @@ function ensureInitialized() {
 function createHandler(method: "GET" | "POST") {
   return (req: Request) => {
     try {
+      const url = req instanceof Request ? req.url : (req as any).url || "unknown";
+      console.log(`[NextAuth] ${method} запрос к:`, url);
+      
       const { handlers } = ensureInitialized();
       if (!handlers || !handlers[method]) {
         throw new Error(`NextAuth handlers.${method} не доступен после инициализации`);
       }
-      return handlers[method](req);
+      
+      console.log(`[NextAuth] Вызов handlers.${method} для:`, url);
+      const response = handlers[method](req);
+      console.log(`[NextAuth] handlers.${method} вернул ответ для:`, url);
+      
+      return response;
     } catch (error) {
       console.error(`[NextAuth] Ошибка в handlers.${method}:`, error);
       const errorMessage = error instanceof Error ? error.message : String(error);

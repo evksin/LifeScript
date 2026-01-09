@@ -20,16 +20,49 @@ function LoginForm() {
       return;
     }
     
+    // Если пользователь уже авторизован, сразу редиректим
     if (status === "authenticated" && session) {
       console.log("Пользователь авторизован, редирект на:", callbackUrl);
       router.replace(callbackUrl);
+      return;
     }
   }, [status, session, callbackUrl, router, error]);
+  
+  // Если пользователь уже авторизован, показываем сообщение о редиректе
+  if (status === "authenticated" && !error) {
+    return (
+      <main
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          padding: "2rem",
+        }}
+      >
+        <div
+          style={{
+            background: "white",
+            padding: "3rem",
+            borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            maxWidth: "400px",
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ color: "#666", marginBottom: "1rem" }}>Вы уже авторизованы. Перенаправление...</p>
+        </div>
+      </main>
+    );
+  }
 
   const handleGoogleSignIn = () => {
     // Используем прямой редирект на NextAuth signin endpoint
     // Это позволяет NextAuth правильно обработать CSRF токен
     const signInUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+    console.log("[LoginForm] Редирект на:", signInUrl);
+    console.log("[LoginForm] Текущий статус:", status);
     window.location.href = signInUrl;
   };
 
@@ -108,7 +141,16 @@ function LoginForm() {
         )}
 
         <button
-          onClick={handleGoogleSignIn}
+          onClick={(e) => {
+            e.preventDefault();
+            try {
+              handleGoogleSignIn();
+            } catch (error) {
+              console.error("[LoginForm] Ошибка при клике на кнопку:", error);
+              alert("Ошибка при попытке входа. Проверьте консоль браузера.");
+            }
+          }}
+          disabled={status === "loading"}
           style={{
             width: "100%",
             padding: "0.875rem 1.5rem",
@@ -118,7 +160,8 @@ function LoginForm() {
             borderRadius: "8px",
             fontSize: "1rem",
             fontWeight: "500",
-            cursor: "pointer",
+            cursor: status === "loading" ? "not-allowed" : "pointer",
+            opacity: status === "loading" ? 0.6 : 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
