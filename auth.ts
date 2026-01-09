@@ -5,14 +5,32 @@ import { prisma } from "@/lib/prisma";
 
 // Валидация переменных окружения (только во время выполнения, не во время сборки)
 function validateEnvVars() {
+  const missing: string[] = [];
+  
   if (!process.env.GOOGLE_CLIENT_ID) {
-    throw new Error("GOOGLE_CLIENT_ID не установлен в переменных окружения");
+    missing.push("GOOGLE_CLIENT_ID");
   }
   if (!process.env.GOOGLE_CLIENT_SECRET) {
-    throw new Error("GOOGLE_CLIENT_SECRET не установлен в переменных окружения");
+    missing.push("GOOGLE_CLIENT_SECRET");
   }
   if (!process.env.AUTH_SECRET) {
-    throw new Error("AUTH_SECRET не установлен в переменных окружения");
+    missing.push("AUTH_SECRET");
+  }
+  
+  if (missing.length > 0) {
+    const errorMessage = `Отсутствуют переменные окружения: ${missing.join(", ")}. Проверьте настройки Vercel: Settings → Environment Variables → Production`;
+    console.error("[NextAuth] " + errorMessage);
+    console.error("[NextAuth] Текущие переменные окружения:", {
+      hasGOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      hasGOOGLE_CLIENT_SECRET: !!process.env.GOOGLE_CLIENT_SECRET,
+      hasAUTH_SECRET: !!process.env.AUTH_SECRET,
+      hasDATABASE_URL: !!process.env.DATABASE_URL,
+      hasAUTH_URL: !!process.env.AUTH_URL,
+      hasNEXTAUTH_URL: !!process.env.NEXTAUTH_URL,
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL: process.env.VERCEL,
+    });
+    throw new Error(errorMessage);
   }
 }
 
