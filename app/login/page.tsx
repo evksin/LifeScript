@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
 
@@ -57,13 +57,23 @@ function LoginForm() {
     );
   }
 
-  const handleGoogleSignIn = () => {
-    // Используем прямой редирект на NextAuth signin endpoint
-    // Это позволяет NextAuth правильно обработать CSRF токен
-    const signInUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
-    console.log("[LoginForm] Редирект на:", signInUrl);
-    console.log("[LoginForm] Текущий статус:", status);
-    window.location.href = signInUrl;
+  const handleGoogleSignIn = async () => {
+    try {
+      console.log("[LoginForm] Начало входа через Google");
+      console.log("[LoginForm] Callback URL:", callbackUrl);
+      console.log("[LoginForm] Текущий статус:", status);
+      
+      // Используем signIn из next-auth/react для правильной обработки OAuth
+      const result = await signIn("google", {
+        callbackUrl: callbackUrl,
+        redirect: true, // Автоматический редирект
+      });
+      
+      console.log("[LoginForm] Результат signIn:", result);
+    } catch (error) {
+      console.error("[LoginForm] Ошибка при входе через Google:", error);
+      alert("Ошибка при попытке входа. Проверьте консоль браузера.");
+    }
   };
 
   // Показываем форму сразу, даже если статус loading, чтобы избежать белого экрана
