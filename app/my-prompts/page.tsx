@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 // Отключаем статическую генерацию, так как страница требует авторизации
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function MyPromptsPage() {
   const user = await getCurrentUser();
@@ -49,7 +49,13 @@ export default async function MyPromptsPage() {
                   {prompt.title}
                 </div>
                 {prompt.description && (
-                  <div style={{ fontSize: "0.875rem", color: "#666", marginBottom: "0.25rem" }}>
+                  <div
+                    style={{
+                      fontSize: "0.875rem",
+                      color: "#666",
+                      marginBottom: "0.25rem",
+                    }}
+                  >
                     {prompt.description}
                   </div>
                 )}
@@ -64,4 +70,3 @@ export default async function MyPromptsPage() {
     </main>
   );
 }
-
