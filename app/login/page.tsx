@@ -35,7 +35,15 @@ function LoginForm() {
     }
     
     // Если пользователь уже авторизован, сразу редиректим
+    // Но только если мы не на странице /login с callbackUrl=/login (чтобы избежать бесконечного цикла)
     if (status === "authenticated" && session) {
+      const targetPath = callbackUrl.split("?")[0]; // Убираем query параметры
+      if (targetPath === "/login") {
+        // Если callbackUrl указывает на /login, редиректим на /dashboard
+        console.log("LoginForm: callbackUrl указывает на /login, редирект на /dashboard");
+        window.location.href = "/dashboard";
+        return;
+      }
       console.log("Пользователь авторизован, редирект на:", callbackUrl);
       // Используем window.location для гарантированного редиректа
       window.location.href = callbackUrl;
