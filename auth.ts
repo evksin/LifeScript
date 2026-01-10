@@ -97,13 +97,6 @@ function initNextAuth() {
       Google({
         clientId,
         clientSecret,
-        authorization: {
-          params: {
-            prompt: "consent",
-            access_type: "offline",
-            response_type: "code",
-          },
-        },
       }),
     ],
   callbacks: {
