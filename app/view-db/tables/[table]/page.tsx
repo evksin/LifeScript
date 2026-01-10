@@ -11,7 +11,7 @@ interface TableData {
 export default function TableViewPage() {
   const router = useRouter();
   const params = useParams();
-  const tableName = params.table as string;
+  const tableName = (params?.table as string) || "";
 
   const [data, setData] = useState<TableData[]>([]);
   const [loading, setLoading] = useState(true);

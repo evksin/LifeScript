@@ -6,7 +6,7 @@ import Link from "next/link";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
-  const error = searchParams.get("error");
+  const error = searchParams?.get("error") || null;
 
   const errorMessages: { [key: string]: string } = {
     Configuration: "Проблема с конфигурацией сервера. Проверьте настройки.",

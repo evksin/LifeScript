@@ -8,8 +8,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  const error = searchParams.get("error");
+  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
+  const error = searchParams?.get("error") || null;
 
   useEffect(() => {
     console.log("LoginForm: status =", status, "session =", session?.user?.email || "нет", "error =", error);
