@@ -41,6 +41,10 @@ function validateEnvVars() {
 const authUrlRaw = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
 const authUrl = authUrlRaw ? authUrlRaw.replace(/\/$/, "") : undefined;
 
+// Проверяем AUTH_TRUST_HOST (официальный способ для NextAuth v5)
+const authTrustHost =
+  process.env.AUTH_TRUST_HOST === "true" || process.env.AUTH_TRUST_HOST === "1";
+
 // Логируем информацию о URL для диагностики (всегда, не только в development)
 console.log("[NextAuth] URL конфигурация:", {
   AUTH_URL: process.env.AUTH_URL
@@ -49,6 +53,8 @@ console.log("[NextAuth] URL конфигурация:", {
   NEXTAUTH_URL: process.env.NEXTAUTH_URL
     ? `установлен (${process.env.NEXTAUTH_URL})`
     : "не установлен",
+  AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST || "не установлен",
+  authTrustHost: authTrustHost,
   VERCEL_URL: process.env.VERCEL_URL || "не установлен",
   authUrl: authUrl || "не установлен",
   NODE_ENV: process.env.NODE_ENV,
@@ -199,9 +205,15 @@ function initNextAuth() {
       secret: authSecret,
       debug: true, // Включаем debug для диагностики
       basePath: "/api/auth",
-      // В NextAuth v5 beta для Vercel используем baseUrl из AUTH_URL
-      // Если AUTH_URL не установлен, используем trustHost: true как резервный вариант
-      ...(authUrl ? { baseUrl: authUrl } : { trustHost: true }),
+      // В NextAuth v5 beta для Vercel:
+      // 1. Если AUTH_TRUST_HOST установлен, используем trustHost: true (официальный способ)
+      // 2. Иначе, если AUTH_URL установлен, используем baseUrl
+      // 3. Иначе используем trustHost: true как резервный вариант
+      ...(authTrustHost
+        ? { trustHost: true }
+        : authUrl
+        ? { baseUrl: authUrl }
+        : { trustHost: true }),
       // Используем as any для обхода проверки типов
     } as any;
 
