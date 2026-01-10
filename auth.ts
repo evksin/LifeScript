@@ -71,7 +71,20 @@ export const authOptions: any = {
         provider: account?.provider,
         hasAccount: !!account,
         hasProfile: !!profile,
+        accountType: account?.type,
+        accountId: account?.id,
       });
+
+      // В production всегда логируем для диагностики
+      if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+        console.log("[NextAuth] signIn callback (production):", {
+          userEmail: user?.email,
+          provider: account?.provider,
+          hasAccount: !!account,
+          hasProfile: !!profile,
+        });
+      }
+
       if (account?.provider === "google") {
         return true;
       }
@@ -132,7 +145,7 @@ export const authOptions: any = {
     error: "/api/auth/error",
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Включаем debug для диагностики на Vercel
 };
 
 // Инициализируем NextAuth
