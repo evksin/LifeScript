@@ -8,11 +8,25 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
+  const rawCallbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
   const error = searchParams?.get("error") || null;
+
+  // Извлекаем путь из callbackUrl, если это полный URL
+  const getPathFromUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.pathname + urlObj.search;
+    } catch {
+      // Если это не полный URL, возвращаем как есть
+      return url.startsWith("/") ? url : `/${url}`;
+    }
+  };
+
+  const callbackUrl = getPathFromUrl(rawCallbackUrl);
 
   useEffect(() => {
     console.log("LoginForm: status =", status, "session =", session?.user?.email || "нет", "error =", error);
+    console.log("LoginForm: rawCallbackUrl =", rawCallbackUrl, "callbackUrl =", callbackUrl);
     
     // Если есть ошибка в URL, не делаем редирект
     if (error) {
@@ -23,10 +37,11 @@ function LoginForm() {
     // Если пользователь уже авторизован, сразу редиректим
     if (status === "authenticated" && session) {
       console.log("Пользователь авторизован, редирект на:", callbackUrl);
-      router.replace(callbackUrl);
+      // Используем window.location для гарантированного редиректа
+      window.location.href = callbackUrl;
       return;
     }
-  }, [status, session, callbackUrl, router, error]);
+  }, [status, session, callbackUrl, router, error, rawCallbackUrl]);
   
   // Если пользователь уже авторизован, показываем сообщение о редиректе
   if (status === "authenticated" && !error) {
