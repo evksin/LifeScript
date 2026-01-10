@@ -1,12 +1,11 @@
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 
 export async function getCurrentUser() {
   try {
-    const session = await auth();
-    return session?.user;
+    const session = await getServerSession(authOptions);
+    return (session as any)?.user || null;
   } catch (error) {
-    // Если NextAuth не инициализирован, возвращаем null
-    // Это может произойти во время сборки, если переменные окружения недоступны
     console.error("[getCurrentUser] Ошибка при получении сессии:", error);
     return null;
   }
