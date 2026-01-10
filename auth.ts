@@ -201,8 +201,10 @@ function initNextAuth() {
       basePath: "/api/auth",
       // В NextAuth v5 beta для Vercel нужно использовать trustHost: true
       // Это позволяет NextAuth автоматически определять baseUrl из заголовков запроса
-      // НЕ используем baseUrl вместе с trustHost, так как это может конфликтовать
       trustHost: true,
+      // Явно устанавливаем baseUrl из AUTH_URL, если он установлен
+      // Это помогает NextAuth правильно определить базовый URL на Vercel
+      ...(authUrl ? { baseUrl: authUrl } : {}),
       // Используем as any для обхода проверки типов
     } as any;
 
