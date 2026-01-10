@@ -35,12 +35,21 @@ export default async function authHandler(req: any, res: any) {
       const expectedCallback = `${
         process.env.NEXTAUTH_URL || "https://life-script-swart.vercel.app"
       }/api/auth/callback/google`;
+      console.log("[NextAuth Pages Router] 🔵 Редирект на Google OAuth");
       console.log(
-        "[NextAuth Pages Router] Редирект на Google OAuth. Ожидаемый callback URL:",
+        "[NextAuth Pages Router] Ожидаемый callback URL:",
         expectedCallback
       );
       console.log(
-        "[NextAuth Pages Router] Убедитесь, что этот URL указан в Google Console!"
+        "[NextAuth Pages Router] NEXTAUTH_URL:",
+        process.env.NEXTAUTH_URL || "не установлен"
+      );
+      console.log(
+        "[NextAuth Pages Router] ⚠️ Убедитесь, что этот URL ТОЧНО указан в Google Console!"
+      );
+      console.log(
+        "[NextAuth Pages Router] Query params для signin:",
+        JSON.stringify(req.query)
       );
     }
 
