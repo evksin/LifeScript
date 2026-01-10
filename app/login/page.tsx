@@ -120,7 +120,7 @@ function LoginForm() {
             }}
           >
             <strong>Ошибка:</strong>{" "}
-            {error === "Configuration"
+{error === "Configuration"
               ? "Проблема с конфигурацией сервера. Проверьте настройки."
               : error === "AccessDenied"
               ? "Доступ запрещён."
@@ -132,6 +132,8 @@ function LoginForm() {
               ? "Ошибка при обработке OAuth callback. Проверьте redirect URI в Google Console."
               : error === "OAuthCreateAccount"
               ? "Не удалось создать аккаунт. Проверьте подключение к базе данных."
+              : error === "google"
+              ? "Ошибка при входе через Google. Проверьте настройки Google OAuth и переменные окружения на Vercel (NEXTAUTH_SECRET, NEXTAUTH_URL)."
               : `Произошла ошибка при входе: ${error}`}
           </div>
         )}
