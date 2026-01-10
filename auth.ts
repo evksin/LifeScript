@@ -66,34 +66,40 @@ export const authOptions: any = {
       account: any;
       profile?: any;
     }) {
-      console.log("[NextAuth] signIn callback:", {
-        user: user?.email,
-        provider: account?.provider,
-        hasAccount: !!account,
-        hasProfile: !!profile,
-        accountType: account?.type,
-        accountId: account?.id,
-      });
-
-      // В production всегда логируем для диагностики
-      if (process.env.VERCEL || process.env.NODE_ENV === "production") {
-        console.log("[NextAuth] signIn callback (production):", {
-          userEmail: user?.email,
+      try {
+        console.log("[NextAuth] signIn callback:", {
+          user: user?.email,
           provider: account?.provider,
           hasAccount: !!account,
           hasProfile: !!profile,
+          accountType: account?.type,
+          accountId: account?.id,
         });
-      }
 
-      if (account?.provider === "google") {
+        // В production всегда логируем для диагностики
+        if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+          console.log("[NextAuth] signIn callback (production):", {
+            userEmail: user?.email,
+            provider: account?.provider,
+            hasAccount: !!account,
+            hasProfile: !!profile,
+          });
+        }
+
+        if (account?.provider === "google") {
+          return true;
+        }
         return true;
+      } catch (error) {
+        console.error("[NextAuth] Ошибка в signIn callback:", error);
+        if (error instanceof Error) {
+          console.error("[NextAuth] Сообщение об ошибке:", error.message);
+        }
+        throw error;
       }
-      return true;
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-      if (process.env.NODE_ENV === "development") {
-        console.log("[NextAuth] redirect callback:", { url, baseUrl });
-      }
+      console.log("[NextAuth] redirect callback:", { url, baseUrl }); // Always log for diagnosis
 
       if (url.startsWith("/")) {
         const redirectUrl = `${baseUrl}${url}`;
@@ -111,6 +117,7 @@ export const authOptions: any = {
           return url;
         }
       } catch (e) {
+        console.error("[NextAuth] Ошибка парсинга URL в redirect callback:", e); // Log parsing errors
         // Fallback to dashboard if URL parsing fails
       }
       return `${baseUrl}/dashboard`;
@@ -146,6 +153,8 @@ export const authOptions: any = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: true, // Включаем debug для диагностики на Vercel
+  // Явно указываем URL для правильной работы callback на Vercel
+  ...(nextAuthUrl ? { url: nextAuthUrl } : {}),
 };
 
 // Инициализируем NextAuth
