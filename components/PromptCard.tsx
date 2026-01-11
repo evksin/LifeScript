@@ -3,19 +3,34 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { togglePublic, toggleFavorite, deletePrompt } from "@/app/actions/prompts";
+import { LikeButton } from "@/components/LikeButton";
 import type { LifeScript } from "@prisma/client";
 
 interface PromptCardProps {
-  prompt: LifeScript;
+  prompt: LifeScript & {
+    likesCount?: number;
+    likedByMe?: boolean;
+    owner?: {
+      name?: string | null;
+      email?: string | null;
+    };
+  };
   onEdit?: (prompt: LifeScript) => void;
   onUpdate?: () => void;
   showActions?: boolean; // Показывать ли кнопки редактирования/удаления
+  showLike?: boolean; // Показывать ли кнопку лайка (для публичных промптов)
 }
 
-export function PromptCard({ prompt, onEdit, onUpdate, showActions = true }: PromptCardProps) {
+export function PromptCard({
+  prompt,
+  onEdit,
+  onUpdate,
+  showActions = true,
+  showLike = false,
+}: PromptCardProps) {
   const { data: session } = useSession();
   const [isUpdating, setIsUpdating] = useState(false);
-  
+
   // Проверяем, принадлежит ли промпт текущему пользователю
   // В публичных промптах может быть owner, но мы не знаем userId из сессии напрямую
   // Поэтому используем showActions для контроля
@@ -83,17 +98,24 @@ export function PromptCard({ prompt, onEdit, onUpdate, showActions = true }: Pro
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-        <h3
-          style={{
-            fontSize: "1.25rem",
-            fontWeight: "600",
-            margin: 0,
-            color: "#333",
-            flex: 1,
-          }}
-        >
-          {prompt.title}
-        </h3>
+        <div style={{ flex: 1 }}>
+          <h3
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: "600",
+              margin: 0,
+              marginBottom: "0.25rem",
+              color: "#333",
+            }}
+          >
+            {prompt.title}
+          </h3>
+          {prompt.owner && (
+            <div style={{ fontSize: "0.875rem", color: "#999" }}>
+              Автор: {prompt.owner.name || prompt.owner.email || "Неизвестно"}
+            </div>
+          )}
+        </div>
         {showActions && (
           <div style={{ display: "flex", gap: "0.5rem", marginLeft: "1rem" }}>
             <button
@@ -143,14 +165,24 @@ export function PromptCard({ prompt, onEdit, onUpdate, showActions = true }: Pro
       </p>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: "0.875rem", color: "#999" }}>
-          {new Date(prompt.updatedAt).toLocaleDateString("ru-RU", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ fontSize: "0.875rem", color: "#999" }}>
+            {new Date(prompt.updatedAt).toLocaleDateString("ru-RU", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </div>
+          {showLike && prompt.isPublic && (
+            <LikeButton
+              promptId={prompt.id}
+              initialLiked={prompt.likedByMe || false}
+              initialCount={prompt.likesCount || 0}
+              onUpdate={onUpdate}
+            />
+          )}
         </div>
         {canEdit && (
           <div style={{ display: "flex", gap: "0.5rem" }}>

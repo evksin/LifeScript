@@ -237,8 +237,15 @@ export async function getPrompts(filters?: {
   }
 }
 
-export async function getPublicPrompts(search?: string) {
+export async function getPublicPrompts(
+  search?: string,
+  sort: "popular" | "recent" = "recent",
+  userId?: string | null
+) {
   try {
+    // Получаем userId, если не передан
+    const currentUserId = userId !== undefined ? userId : await getUserId();
+
     const where: any = {
       isPublic: true,
     };
@@ -250,12 +257,10 @@ export async function getPublicPrompts(search?: string) {
       ];
     }
 
+    // Получаем все промпты с подсчетом лайков
     const prompts = await prisma.lifeScript.findMany({
       where,
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 50,
+      take: 100, // Берем больше для сортировки по популярности
       include: {
         owner: {
           select: {
@@ -263,10 +268,47 @@ export async function getPublicPrompts(search?: string) {
             email: true,
           },
         },
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
+        likes: currentUserId
+          ? {
+              where: {
+                userId: currentUserId,
+              },
+              select: {
+                id: true,
+              },
+            }
+          : false,
       },
     });
 
-    return { success: true, data: prompts };
+    // Преобразуем данные для удобства использования
+    let promptsWithLikes = prompts.map((prompt) => ({
+      ...prompt,
+      likesCount: prompt._count.likes,
+      likedByMe: currentUserId
+        ? prompt.likes && Array.isArray(prompt.likes) && prompt.likes.length > 0
+        : false,
+    }));
+
+    // Сортируем в зависимости от параметра
+    if (sort === "popular") {
+      promptsWithLikes.sort((a, b) => b.likesCount - a.likesCount);
+    } else {
+      promptsWithLikes.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+
+    // Ограничиваем до 50
+    promptsWithLikes = promptsWithLikes.slice(0, 50);
+
+    return { success: true, data: promptsWithLikes };
   } catch (error) {
     console.error("[getPublicPrompts] Ошибка:", error);
     return { error: "Не удалось загрузить публичные промпты", data: [] };

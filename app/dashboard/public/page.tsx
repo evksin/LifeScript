@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter as useNextRouter } from "next/navigation";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { PromptCard } from "@/components/PromptCard";
 import { PromptDialog } from "@/components/PromptDialog";
@@ -9,13 +10,23 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { LifeScript } from "@prisma/client";
 
-export default function PublicPromptsPage() {
+interface PromptWithLikes extends LifeScript {
+  likesCount: number;
+  likedByMe: boolean;
+}
+
+function PublicPromptsContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [prompts, setPrompts] = useState<LifeScript[]>([]);
+  const searchParams = useSearchParams();
+  const nextRouter = useNextRouter();
+  const [prompts, setPrompts] = useState<PromptWithLikes[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sort, setSort] = useState<"popular" | "recent">(
+    (searchParams?.get("sort") as "popular" | "recent") || "recent"
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -28,20 +39,32 @@ export default function PublicPromptsPage() {
     if (status === "authenticated") {
       loadPrompts();
     }
-  }, [status, debouncedSearch]);
+  }, [status, debouncedSearch, sort]);
 
   const loadPrompts = async () => {
     setLoading(true);
     try {
-      const result = await getPublicPrompts(debouncedSearch || undefined);
+      // userId будет получен внутри getPublicPrompts через getUserId
+      const result = await getPublicPrompts(
+        debouncedSearch || undefined,
+        sort,
+        null // Передаем null, так как getPublicPrompts сам получит userId через getUserId
+      );
       if (result.success && result.data) {
-        setPrompts(result.data);
+        setPrompts(result.data as PromptWithLikes[]);
       }
     } catch (error) {
       console.error("Ошибка при загрузке публичных промптов:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSortChange = (newSort: "popular" | "recent") => {
+    setSort(newSort);
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("sort", newSort);
+    nextRouter.push(`/dashboard/public?${params.toString()}`);
   };
 
   if (status === "loading") {
@@ -121,20 +144,52 @@ export default function PublicPromptsPage() {
           </button>
         </div>
 
-        <div style={{ marginBottom: "2rem" }}>
+        <div style={{ marginBottom: "2rem", display: "flex", gap: "1rem", alignItems: "center" }}>
           <input
             type="text"
             placeholder="Поиск по заголовку или содержимому..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              width: "100%",
+              flex: 1,
               padding: "0.75rem 1rem",
               border: "1px solid #ddd",
               borderRadius: "8px",
               fontSize: "1rem",
             }}
           />
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button
+              onClick={() => handleSortChange("popular")}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background: sort === "popular" ? "#0070f3" : "#f0f0f0",
+                color: sort === "popular" ? "white" : "#333",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+              }}
+            >
+              Популярные
+            </button>
+            <button
+              onClick={() => handleSortChange("recent")}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background: sort === "recent" ? "#0070f3" : "#f0f0f0",
+                color: sort === "recent" ? "white" : "#333",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+              }}
+            >
+              Новые
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -172,11 +227,33 @@ export default function PublicPromptsPage() {
                 prompt={prompt}
                 onUpdate={loadPrompts}
                 showActions={false}
+                showLike={true}
               />
             ))}
           </div>
         )}
       </main>
     </div>
+  );
+}
+
+export default function PublicPromptsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100vh",
+          }}
+        >
+          <p>Загрузка...</p>
+        </div>
+      }
+    >
+      <PublicPromptsContent />
+    </Suspense>
   );
 }

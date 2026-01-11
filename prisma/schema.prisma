@@ -23,6 +23,7 @@ model User {
   notes         Note[]
   lifeScripts   LifeScript[] @relation("LifeScriptOwner")
   votes         Vote[]
+  likes         Like[]
 
   @@map("users")
 }
@@ -105,6 +106,7 @@ model LifeScript {
   category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   votes    Vote[]
   tags     TagOnLifeScript[]
+  likes    Like[]
 
   @@index([ownerId, updatedAt])
   @@index([visibility, createdAt])
@@ -149,6 +151,20 @@ model Vote {
   @@index([lifeScriptId])
   @@index([userId])
   @@map("votes")
+}
+
+model Like {
+  id        String     @id @default(cuid())
+  userId    String
+  promptId  String
+  createdAt DateTime   @default(now())
+
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt LifeScript @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, promptId])
+  @@index([promptId])
+  @@map("likes")
 }
 
 enum Visibility {
