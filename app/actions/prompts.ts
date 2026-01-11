@@ -314,3 +314,118 @@ export async function getPublicPrompts(
     return { error: "Не удалось загрузить публичные промпты", data: [] };
   }
 }
+
+export async function getRecentPrompts(
+  take: number = 20,
+  userId?: string | null
+) {
+  try {
+    const currentUserId = userId !== undefined ? userId : await getUserId();
+
+    const prompts = await prisma.lifeScript.findMany({
+      where: {
+        isPublic: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take,
+      include: {
+        owner: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
+        likes: currentUserId
+          ? {
+              where: {
+                userId: currentUserId,
+              },
+              select: {
+                id: true,
+              },
+            }
+          : false,
+      },
+    });
+
+    const promptsWithLikes = prompts.map((prompt) => ({
+      ...prompt,
+      likesCount: prompt._count.likes,
+      likedByMe: currentUserId
+        ? prompt.likes && Array.isArray(prompt.likes) && prompt.likes.length > 0
+        : false,
+    }));
+
+    return { success: true, data: promptsWithLikes };
+  } catch (error) {
+    console.error("[getRecentPrompts] Ошибка:", error);
+    return { error: "Не удалось загрузить недавние промпты", data: [] };
+  }
+}
+
+export async function getPopularPrompts(
+  take: number = 20,
+  userId?: string | null
+) {
+  try {
+    const currentUserId = userId !== undefined ? userId : await getUserId();
+
+    // Получаем больше промптов для сортировки по популярности
+    const prompts = await prisma.lifeScript.findMany({
+      where: {
+        isPublic: true,
+      },
+      take: Math.max(take * 2, 50), // Берем больше для сортировки
+      include: {
+        owner: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
+        likes: currentUserId
+          ? {
+              where: {
+                userId: currentUserId,
+              },
+              select: {
+                id: true,
+              },
+            }
+          : false,
+      },
+    });
+
+    // Преобразуем и сортируем по likesCount
+    let promptsWithLikes = prompts.map((prompt) => ({
+      ...prompt,
+      likesCount: prompt._count.likes,
+      likedByMe: currentUserId
+        ? prompt.likes && Array.isArray(prompt.likes) && prompt.likes.length > 0
+        : false,
+    }));
+
+    // Сортируем по популярности (likesCount desc)
+    promptsWithLikes.sort((a, b) => b.likesCount - a.likesCount);
+
+    // Ограничиваем до нужного количества
+    promptsWithLikes = promptsWithLikes.slice(0, take);
+
+    return { success: true, data: promptsWithLikes };
+  } catch (error) {
+    console.error("[getPopularPrompts] Ошибка:", error);
+    return { error: "Не удалось загрузить популярные промпты", data: [] };
+  }
+}

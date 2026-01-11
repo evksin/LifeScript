@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { togglePublic, toggleFavorite, deletePrompt } from "@/app/actions/prompts";
 import { LikeButton } from "@/components/LikeButton";
 import type { LifeScript } from "@prisma/client";
@@ -99,17 +100,33 @@ export function PromptCard({
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
         <div style={{ flex: 1 }}>
-          <h3
+          <Link
+            href={`/prompts/${prompt.id}`}
             style={{
-              fontSize: "1.25rem",
-              fontWeight: "600",
-              margin: 0,
-              marginBottom: "0.25rem",
+              textDecoration: "none",
               color: "#333",
             }}
           >
-            {prompt.title}
-          </h3>
+            <h3
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: "600",
+                margin: 0,
+                marginBottom: "0.25rem",
+                color: "#333",
+                cursor: "pointer",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#0070f3";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#333";
+              }}
+            >
+              {prompt.title}
+            </h3>
+          </Link>
           {prompt.owner && (
             <div style={{ fontSize: "0.875rem", color: "#999" }}>
               Автор: {prompt.owner.name || prompt.owner.email || "Неизвестно"}
