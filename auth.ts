@@ -61,6 +61,8 @@ export const authOptions: any = {
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
+          // Принудительно используем английский язык и основной домен .com
+          hl: "en",
         },
       },
     }),
