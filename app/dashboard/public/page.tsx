@@ -4,22 +4,19 @@ import { useState, useEffect } from "react";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { PromptCard } from "@/components/PromptCard";
 import { PromptDialog } from "@/components/PromptDialog";
-import { getPrompts } from "@/app/actions/prompts";
+import { getPublicPrompts } from "@/app/actions/prompts";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { LifeScript } from "@prisma/client";
 
-export default function DashboardPage() {
+export default function PublicPromptsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [prompts, setPrompts] = useState<LifeScript[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingPrompt, setEditingPrompt] = useState<LifeScript | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Debounce поиска
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -27,7 +24,6 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Загрузка промптов
   useEffect(() => {
     if (status === "authenticated") {
       loadPrompts();
@@ -37,14 +33,12 @@ export default function DashboardPage() {
   const loadPrompts = async () => {
     setLoading(true);
     try {
-      const result = await getPrompts({
-        search: debouncedSearch || undefined,
-      });
+      const result = await getPublicPrompts(debouncedSearch || undefined);
       if (result.success && result.data) {
         setPrompts(result.data);
       }
     } catch (error) {
-      console.error("Ошибка при загрузке промптов:", error);
+      console.error("Ошибка при загрузке публичных промптов:", error);
     } finally {
       setLoading(false);
     }
@@ -69,20 +63,6 @@ export default function DashboardPage() {
     router.push("/login");
     return null;
   }
-
-  const handleCreateNew = () => {
-    setEditingPrompt(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleEdit = (prompt: LifeScript) => {
-    setEditingPrompt(prompt);
-    setIsDialogOpen(true);
-  };
-
-  const handleDialogSuccess = () => {
-    loadPrompts();
-  };
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/login" });
@@ -119,10 +99,10 @@ export default function DashboardPage() {
                 color: "#333",
               }}
             >
-              Все промпты
+              Публичные промпты
             </h1>
             <p style={{ color: "#666", margin: 0 }}>
-              Добро пожаловать, {session?.user?.name || session?.user?.email}!
+              Промпты, доступные всем пользователям
             </p>
           </div>
           <button
@@ -141,43 +121,20 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            marginBottom: "2rem",
-            alignItems: "center",
-          }}
-        >
+        <div style={{ marginBottom: "2rem" }}>
           <input
             type="text"
             placeholder="Поиск по заголовку или содержимому..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              flex: 1,
+              width: "100%",
               padding: "0.75rem 1rem",
               border: "1px solid #ddd",
               borderRadius: "8px",
               fontSize: "1rem",
             }}
           />
-          <button
-            onClick={handleCreateNew}
-            style={{
-              padding: "0.75rem 1.5rem",
-              background: "#0070f3",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "1rem",
-              fontWeight: "500",
-              whiteSpace: "nowrap",
-            }}
-          >
-            ➕ Создать промпт
-          </button>
         </div>
 
         {loading ? (
@@ -201,28 +158,11 @@ export default function DashboardPage() {
               boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
             }}
           >
-            <p style={{ fontSize: "1.125rem", color: "#666", marginBottom: "1rem" }}>
+            <p style={{ fontSize: "1.125rem", color: "#666" }}>
               {debouncedSearch
-                ? "Промпты не найдены"
-                : "У вас пока нет промптов"}
+                ? "Публичные промпты не найдены"
+                : "Публичных промптов пока нет"}
             </p>
-            {!debouncedSearch && (
-              <button
-                onClick={handleCreateNew}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background: "#0070f3",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontSize: "1rem",
-                  fontWeight: "500",
-                }}
-              >
-                Создать первый промпт
-              </button>
-            )}
           </div>
         ) : (
           <div>
@@ -230,22 +170,12 @@ export default function DashboardPage() {
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
-                onEdit={handleEdit}
                 onUpdate={loadPrompts}
+                showActions={false}
               />
             ))}
           </div>
         )}
-
-        <PromptDialog
-          isOpen={isDialogOpen}
-          onClose={() => {
-            setIsDialogOpen(false);
-            setEditingPrompt(null);
-          }}
-          prompt={editingPrompt}
-          onSuccess={handleDialogSuccess}
-        />
       </main>
     </div>
   );

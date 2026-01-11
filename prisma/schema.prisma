@@ -21,7 +21,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   notes         Note[]
-  lifeScripts   LifeScript[]
+  lifeScripts   LifeScript[] @relation("LifeScriptOwner")
   votes         Vote[]
 
   @@map("users")
@@ -89,23 +89,27 @@ model Category {
 
 model LifeScript {
   id          String            @id @default(uuid())
-  ownerId     String
+  ownerId     String            // Используем ownerId в БД, но в коде это будет userId
   title       String
-  content     String
-  description String?
-  categoryId  String
+  content     String            @db.Text
+  description String?           @db.Text
+  categoryId  String?           // Опциональное, так как в PROMPT.md не упоминается категория
   visibility  Visibility        @default(PRIVATE)
+  isPublic    Boolean           @default(false) // Добавлено согласно PROMPT.md
+  isFavorite  Boolean           @default(false) // Добавлено согласно PROMPT.md
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   publishedAt DateTime?
 
-  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  owner    User      @relation("LifeScriptOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   votes    Vote[]
   tags     TagOnLifeScript[]
 
   @@index([ownerId, updatedAt])
   @@index([visibility, createdAt])
+  @@index([isPublic])
+  @@index([isFavorite])
   @@map("life_scripts")
 }
 
