@@ -47,12 +47,6 @@ export default function NotFound() {
           fontWeight: "500",
           transition: "background 0.2s",
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "#0051cc";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "#0070f3";
-        }}
       >
         Вернуться на главную
       </Link>

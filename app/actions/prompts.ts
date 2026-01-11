@@ -320,7 +320,13 @@ export async function getRecentPrompts(
   userId?: string | null
 ) {
   try {
-    const currentUserId = userId !== undefined ? userId : await getUserId();
+    let currentUserId: string | null = null;
+    try {
+      currentUserId = userId !== undefined ? userId : await getUserId();
+    } catch (error) {
+      console.error("[getRecentPrompts] Ошибка при получении userId:", error);
+      // Продолжаем без userId
+    }
 
     const prompts = await prisma.lifeScript.findMany({
       where: {
@@ -366,7 +372,8 @@ export async function getRecentPrompts(
     return { success: true, data: promptsWithLikes };
   } catch (error) {
     console.error("[getRecentPrompts] Ошибка:", error);
-    return { error: "Не удалось загрузить недавние промпты", data: [] };
+    // Возвращаем пустой массив вместо ошибки, чтобы страница могла загрузиться
+    return { success: false, error: "Не удалось загрузить недавние промпты", data: [] };
   }
 }
 
@@ -375,7 +382,13 @@ export async function getPopularPrompts(
   userId?: string | null
 ) {
   try {
-    const currentUserId = userId !== undefined ? userId : await getUserId();
+    let currentUserId: string | null = null;
+    try {
+      currentUserId = userId !== undefined ? userId : await getUserId();
+    } catch (error) {
+      console.error("[getPopularPrompts] Ошибка при получении userId:", error);
+      // Продолжаем без userId
+    }
 
     // Получаем больше промптов для сортировки по популярности
     const prompts = await prisma.lifeScript.findMany({
@@ -426,6 +439,7 @@ export async function getPopularPrompts(
     return { success: true, data: promptsWithLikes };
   } catch (error) {
     console.error("[getPopularPrompts] Ошибка:", error);
-    return { error: "Не удалось загрузить популярные промпты", data: [] };
+    // Возвращаем пустой массив вместо ошибки, чтобы страница могла загрузиться
+    return { success: false, error: "Не удалось загрузить популярные промпты", data: [] };
   }
 }

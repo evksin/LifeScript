@@ -84,12 +84,6 @@ export default async function PromptPage({ params }: PageProps) {
           fontSize: "0.875rem",
           transition: "color 0.2s",
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = "#333";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = "#666";
-        }}
       >
         ← Назад к главной
       </Link>

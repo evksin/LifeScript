@@ -6,8 +6,17 @@ import { PromptCard } from "@/components/PromptCard";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const user = await getCurrentUser();
-  const userId = await getUserId();
+  let user = null;
+  let userId: string | null = null;
+
+  // Безопасное получение пользователя
+  try {
+    user = await getCurrentUser();
+    userId = await getUserId();
+  } catch (error) {
+    console.error("[Home] Ошибка при получении пользователя:", error);
+    // Продолжаем без пользователя
+  }
 
   // Получаем недавние и популярные промпты
   let recentPrompts: any[] = [];
@@ -15,8 +24,14 @@ export default async function Home() {
 
   try {
     const [recentResult, popularResult] = await Promise.all([
-      getRecentPrompts(20, userId),
-      getPopularPrompts(20, userId),
+      getRecentPrompts(20, userId).catch((err) => {
+        console.error("[Home] Ошибка getRecentPrompts:", err);
+        return { success: false, data: [] };
+      }),
+      getPopularPrompts(20, userId).catch((err) => {
+        console.error("[Home] Ошибка getPopularPrompts:", err);
+        return { success: false, data: [] };
+      }),
     ]);
 
     recentPrompts = recentResult.success ? recentResult.data : [];
@@ -80,14 +95,6 @@ export default async function Home() {
               fontWeight: "600",
               transition: "transform 0.2s, box-shadow 0.2s",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
           >
             Перейти в дашборд
           </Link>
@@ -104,14 +111,6 @@ export default async function Home() {
               fontSize: "1.125rem",
               fontWeight: "600",
               transition: "transform 0.2s, box-shadow 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
             }}
           >
             Войти / Зарегистрироваться

@@ -38,12 +38,6 @@ export function Footer() {
               fontSize: "0.875rem",
               transition: "color 0.2s",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#333";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#666";
-            }}
           >
             Главная
           </Link>
@@ -54,12 +48,6 @@ export function Footer() {
               textDecoration: "none",
               fontSize: "0.875rem",
               transition: "color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#333";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#666";
             }}
           >
             Дашборд
