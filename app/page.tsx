@@ -10,13 +10,21 @@ export default async function Home() {
   const userId = await getUserId();
 
   // Получаем недавние и популярные промпты
-  const [recentResult, popularResult] = await Promise.all([
-    getRecentPrompts(20, userId),
-    getPopularPrompts(20, userId),
-  ]);
+  let recentPrompts: any[] = [];
+  let popularPrompts: any[] = [];
 
-  const recentPrompts = recentResult.success ? recentResult.data : [];
-  const popularPrompts = popularResult.success ? popularResult.data : [];
+  try {
+    const [recentResult, popularResult] = await Promise.all([
+      getRecentPrompts(20, userId),
+      getPopularPrompts(20, userId),
+    ]);
+
+    recentPrompts = recentResult.success ? recentResult.data : [];
+    popularPrompts = popularResult.success ? popularResult.data : [];
+  } catch (error) {
+    console.error("[Home] Ошибка при загрузке промптов:", error);
+    // Продолжаем работу с пустыми массивами
+  }
 
   return (
     <main

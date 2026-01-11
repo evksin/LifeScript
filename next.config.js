@@ -6,6 +6,8 @@ const nextConfig = {
       bodySizeLimit: "2mb",
     },
   },
+  // Увеличиваем таймаут для статической генерации
+  staticPageGenerationTimeout: 120,
 };
 
 module.exports = nextConfig;

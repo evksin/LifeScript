@@ -5,6 +5,13 @@ import { LikeButton } from "@/components/LikeButton";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+export const revalidate = 0;
+
+// Явно указываем, что не нужно генерировать статические параметры
+export async function generateStaticParams() {
+  return [];
+}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -14,7 +21,9 @@ export default async function PromptPage({ params }: PageProps) {
   const { id } = await params;
   const userId = await getUserId();
 
-  const prompt = await prisma.lifeScript.findFirst({
+  let prompt;
+  try {
+    prompt = await prisma.lifeScript.findFirst({
     where: {
       id,
       isPublic: true, // Только публичные промпты
@@ -42,7 +51,11 @@ export default async function PromptPage({ params }: PageProps) {
           }
         : false,
     },
-  });
+    });
+  } catch (error) {
+    console.error("[PromptPage] Ошибка при загрузке промпта:", error);
+    notFound();
+  }
 
   if (!prompt) {
     notFound();
