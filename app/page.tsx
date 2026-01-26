@@ -73,13 +73,25 @@ export default async function Home() {
         <p
           style={{
             fontSize: "1.5rem",
-            marginBottom: "2rem",
+            marginBottom: "1rem",
             color: "rgba(255, 255, 255, 0.9)",
             maxWidth: "600px",
-            margin: "0 auto 2rem",
+            margin: "0 auto 1rem",
           }}
         >
           Платформа для создания, управления и обмена промптами
+        </p>
+        <p
+          style={{
+            fontSize: "1.125rem",
+            marginBottom: "2rem",
+            color: "rgba(255, 255, 255, 0.85)",
+            maxWidth: "700px",
+            margin: "0 auto 2rem",
+            lineHeight: "1.6",
+          }}
+        >
+          Это библиотека AI-сценариев для работы над собой. Мы заменяем абстрактные советы на точные алгоритмы для самопознания, карьерного роста и ментального здоровья. Получите доступ к коллективному разуму для решения ваших личных задач.
         </p>
         {user ? (
           <Link
