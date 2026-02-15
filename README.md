@@ -1,163 +1,192 @@
-# LifeScript
+🧬 LifeScript
 
-Минимальный рабочий проект на Next.js (App Router) + Prisma + NeonDB (PostgreSQL), готовый к деплою на Vercel.
+AI-powered Personal Automation Platform
 
-## Технологии
+LifeScript is a SaaS-style system for storing, structuring and automating personal knowledge and workflows — powered by AI.
 
-- **Next.js 14** (TypeScript, App Router)
-- **Prisma** (ORM)
-- **NeonDB** (PostgreSQL)
-- **Vercel** (деплой)
+Think of it as a personal operating system for your life, notes and thinking.
 
-## Быстрый старт
+🚀 What is LifeScript?
 
-### 1. Установка зависимостей
+LifeScript is a platform that lets you:
 
-```powershell
+store personal notes and data
+
+structure them with a database
+
+connect them to AI
+
+automate how information becomes actions
+
+It is designed to grow into a second brain + automation engine.
+
+🧠 Why it exists
+
+People have:
+
+notes
+
+ideas
+
+plans
+
+thoughts
+
+documents
+
+But no system that understands and connects them.
+
+LifeScript aims to become an AI-powered memory and control center.
+
+🧩 What it can become
+
+LifeScript is built to evolve into:
+
+AI-powered note system
+
+personal knowledge base
+
+task & goal manager
+
+thinking assistant
+
+automation hub
+
+🛠 Technical foundation
+
+LifeScript is built as a production-ready SaaS backend and frontend.
+
+Technology stack
+
+Next.js 14 (TypeScript, App Router)
+
+Prisma ORM
+
+NeonDB (PostgreSQL)
+
+Vercel (deployment)
+
+⚙️ Quick start
+1. Install dependencies
 npm install
-```
 
-### 2. Настройка базы данных
+2. Database setup
 
-1. Создайте базу данных на [NeonDB](https://neon.tech)
-2. Скопируйте connection string
-3. Создайте файл `.env.local` и добавьте:
+Create a database in NeonDB
+Copy the connection string
+Create .env.local:
 
-```env
 DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 AUTH_SECRET="your-auth-secret"
-```
 
-**Получение Google OAuth credentials:**
-1. Перейдите в [Google Cloud Console](https://console.cloud.google.com)
-2. Создайте новый проект или выберите существующий
-3. Включите Google+ API
-4. Перейдите в "Credentials" → "Create Credentials" → "OAuth client ID"
-5. Выберите "Web application"
-6. Добавьте Authorized redirect URIs:
-   - `http://localhost:3000/api/auth/callback/google` (для разработки)
-   - `https://your-domain.vercel.app/api/auth/callback/google` (для production)
-7. Скопируйте Client ID и Client Secret
+Google OAuth setup
 
-**Генерация AUTH_SECRET:**
-```powershell
-# Используйте OpenSSL или любой генератор случайных строк
+Open Google Cloud Console
+
+Create or select a project
+
+Enable Google+ API
+
+Go to Credentials → Create Credentials → OAuth client ID
+
+Choose Web application
+
+Add redirect URIs:
+
+http://localhost:3000/api/auth/callback/google
+https://your-domain.vercel.app/api/auth/callback/google
+
+
+Copy Client ID and Client Secret
+
+Generate AUTH_SECRET
 openssl rand -base64 32
-```
 
-### 3. Настройка Prisma и миграция
-
-```powershell
-# Генерация Prisma Client
+3. Prisma setup & migration
 npx prisma generate
-
-# Создание и применение миграции
 npm run db:migrate
-```
 
-### 4. Заполнение базы данных (seed)
-
-```powershell
+4. Seed database
 npm run db:seed
-```
 
-### 5. Запуск проекта
-
-```powershell
-# Режим разработки
+5. Run project
+Development
 npm run dev
 
-# Сборка для продакшена
+Production
 npm run build
 npm start
-```
 
-Откройте [http://localhost:3000](http://localhost:3000) в браузере.
 
-## Деплой на Vercel
+Open:
 
-### 1. Подготовка
+http://localhost:3000
 
-1. Убедитесь, что все изменения закоммичены в Git
-2. Создайте репозиторий на GitHub (если еще нет)
+🚀 Deploy to Vercel
+1. Prepare
 
-### 2. Деплой через Vercel CLI
+Make sure everything is committed to GitHub.
 
-```powershell
-# Установка Vercel CLI (если еще не установлен)
+2. Deploy via Vercel CLI
 npm i -g vercel
-
-# Логин в Vercel
 vercel login
-
-# Деплой
 vercel
-```
 
-### 3. Настройка переменных окружения на Vercel
+3. Environment variables
 
-1. Перейдите в настройки проекта на Vercel
-2. Добавьте переменную окружения:
-   - **Name**: `DATABASE_URL`
-   - **Value**: ваш connection string от NeonDB
+In Vercel → Project Settings → Environment Variables
+Add:
 
-### 4. Деплой через GitHub
+DATABASE_URL = your NeonDB connection string
 
-1. Подключите репозиторий к Vercel
-2. Добавьте переменную окружения `DATABASE_URL` в настройках проекта
-3. Vercel автоматически соберет и задеплоит проект
+4. Deploy via GitHub
 
-## Структура проекта
+Connect the repository to Vercel
+Add DATABASE_URL
+Vercel will auto-deploy on every push.
 
-```
+📦 Project structure
 .
 ├── app/
-│   ├── layout.tsx      # Корневой layout
-│   ├── page.tsx        # Главная страница с запросом к БД
-│   └── globals.css     # Глобальные стили
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
 ├── lib/
-│   └── prisma.ts       # Singleton для Prisma Client
+│   └── prisma.ts
 ├── prisma/
-│   ├── schema.prisma   # Схема базы данных
-│   └── seed.ts         # Seed файл для заполнения БД
-├── .env.example        # Пример переменных окружения
+│   ├── schema.prisma
+│   └── seed.ts
+├── .env.example
 ├── .gitignore
 ├── next.config.js
 ├── package.json
 ├── tsconfig.json
-└── vercel.json         # Конфигурация для Vercel
-```
+└── vercel.json
 
-## Модель данных
-
-### Note
-
-- `id` (String, UUID) - уникальный идентификатор
-- `title` (String) - заголовок заметки
-- `createdAt` (DateTime) - дата создания
-
-## Полезные команды
-
-```powershell
-# Разработка
+🧠 Data model
+Note
+Field	Type
+id	String (UUID)
+title	String
+createdAt	DateTime
+🛠 Useful commands
 npm run dev
-
-# Сборка
 npm run build
-
-# Запуск продакшен версии
 npm start
+npm run db:migrate
+npm run db:seed
+npm run db:studio
 
-# Prisma команды
-npm run db:migrate      # Создать и применить миграцию
-npm run db:seed         # Заполнить БД тестовыми данными
-npm run db:studio       # Открыть Prisma Studio
-```
+⚠️ Notes
 
-## Примечания
+All environment variables must be configured in Vercel
 
-- Все переменные окружения должны быть настроены в Vercel перед деплоем
-- Prisma Client генерируется автоматически при сборке (`npm run build`)
-- Для продакшена убедитесь, что `DATABASE_URL` настроен в переменных окружения Vercel
+Prisma Client is generated automatically on build
+
+Ensure DATABASE_URL is set in production
+
+🔮 Vision
+
+LifeScript is designed to become a personal AI brain — a system that remembers, understands and helps you think, plan and act.
