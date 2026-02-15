@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://life-script-swart.vercel.app " target="_blank">
+    <img src="https://img.shields.io/badge/Try%20LifeScript-Live%20Demo-blue?style=for-the-badge"/>
+  </a>
+</p>
+
 # LifeScript 🧬  
 Your personal life operating system — built for AI-powered productivity.
 
