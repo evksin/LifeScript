@@ -1,192 +1,115 @@
-🧬 LifeScript
+# LifeScript 🧬  
+Your personal life operating system — built for AI-powered productivity.
 
-AI-powered Personal Automation Platform
+LifeScript is a modern web platform designed to help you store, organize and evolve your life data — notes, thoughts, and soon goals, habits and AI insights.
 
-LifeScript is a SaaS-style system for storing, structuring and automating personal knowledge and workflows — powered by AI.
+---
 
-Think of it as a personal operating system for your life, notes and thinking.
+## 🚀 What is LifeScript?
 
-🚀 What is LifeScript?
+LifeScript is a foundation for a **personal life OS**.
 
-LifeScript is a platform that lets you:
+Think of it as:
+- Notion for your private thoughts  
+- A journal for your mind  
+- A backend for future AI assistants  
 
-store personal notes and data
+It is built to become an intelligent layer between **you and your life data**.
 
-structure them with a database
+---
 
-connect them to AI
+## 🧠 Why it matters
 
-automate how information becomes actions
+Most productivity tools are:
+- Static  
+- Fragmented  
+- Not AI-ready  
 
-It is designed to grow into a second brain + automation engine.
+LifeScript is designed as:
+> A structured, queryable, secure database of your life — ready for AI.
 
-🧠 Why it exists
+---
 
-People have:
+## ✨ Core features (current)
 
-notes
+- 📝 Notes with database storage  
+- 🔐 Google OAuth authentication  
+- ⚡ Fast modern web app  
+- 🧠 Prisma-powered data layer  
+- ☁️ Cloud-ready architecture  
 
-ideas
+---
 
-plans
+## 🛠 Tech Stack
 
-thoughts
+- **Next.js 14 (TypeScript, App Router)**
+- **Prisma ORM**
+- **NeonDB (PostgreSQL)**
+- **Google OAuth**
+- **Vercel**
 
-documents
+---
 
-But no system that understands and connects them.
+## ⚙️ Quick Start
 
-LifeScript aims to become an AI-powered memory and control center.
-
-🧩 What it can become
-
-LifeScript is built to evolve into:
-
-AI-powered note system
-
-personal knowledge base
-
-task & goal manager
-
-thinking assistant
-
-automation hub
-
-🛠 Technical foundation
-
-LifeScript is built as a production-ready SaaS backend and frontend.
-
-Technology stack
-
-Next.js 14 (TypeScript, App Router)
-
-Prisma ORM
-
-NeonDB (PostgreSQL)
-
-Vercel (deployment)
-
-⚙️ Quick start
-1. Install dependencies
+### 1) Install dependencies
+```bash
 npm install
-
-2. Database setup
-
-Create a database in NeonDB
-Copy the connection string
+2) Environment variables
 Create .env.local:
 
-DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-AUTH_SECRET="your-auth-secret"
+DATABASE_URL="postgresql://..."
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+AUTH_SECRET="..."
+Generate AUTH_SECRET:
 
-Google OAuth setup
-
-Open Google Cloud Console
-
-Create or select a project
-
-Enable Google+ API
-
-Go to Credentials → Create Credentials → OAuth client ID
-
-Choose Web application
-
-Add redirect URIs:
-
-http://localhost:3000/api/auth/callback/google
-https://your-domain.vercel.app/api/auth/callback/google
-
-
-Copy Client ID and Client Secret
-
-Generate AUTH_SECRET
 openssl rand -base64 32
-
-3. Prisma setup & migration
+3) Database setup
 npx prisma generate
 npm run db:migrate
-
-4. Seed database
 npm run db:seed
-
-5. Run project
-Development
+4) Run
 npm run dev
+Open http://localhost:3000
 
-Production
-npm run build
-npm start
+☁️ Deploy to Vercel
+Push to GitHub
 
+Import repo in Vercel
 
-Open:
+Add DATABASE_URL as env variable
 
-http://localhost:3000
+Deploy
 
-🚀 Deploy to Vercel
-1. Prepare
-
-Make sure everything is committed to GitHub.
-
-2. Deploy via Vercel CLI
-npm i -g vercel
-vercel login
-vercel
-
-3. Environment variables
-
-In Vercel → Project Settings → Environment Variables
-Add:
-
-DATABASE_URL = your NeonDB connection string
-
-4. Deploy via GitHub
-
-Connect the repository to Vercel
-Add DATABASE_URL
-Vercel will auto-deploy on every push.
-
-📦 Project structure
-.
-├── app/
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── globals.css
-├── lib/
-│   └── prisma.ts
-├── prisma/
-│   ├── schema.prisma
-│   └── seed.ts
-├── .env.example
-├── .gitignore
-├── next.config.js
-├── package.json
-├── tsconfig.json
-└── vercel.json
-
+📂 Project structure
+app/
+lib/
+prisma/
+.env.example
+vercel.json
 🧠 Data model
 Note
-Field	Type
-id	String (UUID)
-title	String
-createdAt	DateTime
-🛠 Useful commands
-npm run dev
-npm run build
-npm start
-npm run db:migrate
-npm run db:seed
-npm run db:studio
 
-⚠️ Notes
+id (UUID)
 
-All environment variables must be configured in Vercel
+title (String)
 
-Prisma Client is generated automatically on build
+createdAt (DateTime)
 
-Ensure DATABASE_URL is set in production
+This is the core of your life database.
 
-🔮 Vision
+🎯 Who is this for?
+LifeScript is for:
 
-LifeScript is designed to become a personal AI brain — a system that remembers, understands and helps you think, plan and act.
+Builders
+
+Founders
+
+Thinkers
+
+Anyone who wants an AI-augmented life system
+
+👨‍💻 Author
+Built by evksin
+Telecommunications engineer & AI-focused developer
